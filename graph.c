@@ -663,10 +663,10 @@ void movePolyline(PolyLine* p, int dx, int dy) {
 // {
 // 	inline void plot4points(double cx, double cy, double x, double y)
 // 	{
-// 		drawLine(cx + x, cy + y);
-// 	  drawLine(cx - x, cy + y);
-// 		drawLine(cx + x, cy - y);
-// 		drawLine(cx - x, cy - y);
+// 		draw(cx + x, cy + y);
+// 	  draw(cx - x, cy + y);
+// 		draw(cx + x, cy - y);
+// 		draw(cx - x, cy - y);
 // 	}
 //
 // 	inline void plot8points(double cx, double cy, double x, double y)
