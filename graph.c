@@ -52,7 +52,7 @@ void initArray(Block *a, size_t initialSize) {
 
 void insertArray(Block *a, int element) {
   // a->used is the number of used entries, because a->array[a->used++] updates a->used only *after* the array has been accessed.
-  // Therefore a->used can go up to a->size 
+  // Therefore a->used can go up to a->size
   if (a->used == a->size) {
     a->size *= 2;
     a->array = (int *)realloc(a->array, a->size * sizeof(int));
@@ -244,13 +244,13 @@ void moveUp(Block* blockmem, int px) {
 // STRUKTUR DATA DAN METODE PENGGAMBARAN GARIS-------------------------------------------------------------- //
 
 typedef struct {
-  
+
   int x1; int y1; // Koordinat titik pertama garis
   int x2; int y2; // Koordinat titik kedua garis
-  
+
   // Encoding warna garis dalam RGBA / RGB
   int r; int g; int b; int a;
-  
+
 } Line;
 
 void initLine(Line* l, int xa, int ya, int xb, int yb, int rx, int gx, int bx, int ax) {
@@ -260,37 +260,37 @@ void initLine(Line* l, int xa, int ya, int xb, int yb, int rx, int gx, int bx, i
 }
 
 void drawLine(Line* l) {
-	
+
 	// Coord. of the next point to be displayed
-	int x = (*l).x1; 
+	int x = (*l).x1;
 	int y = (*l).y1;
-		
+
 	// Calculate initial error factor
 	int dx = abs((*l).x2 - (*l).x1);
 	int dy = abs((*l).y2 - (*l).y1);
 	int p = 0;
-	
+
 	// If the absolute gradien is less than 1
 	if(dx >= dy) {
-		
+
 		// Memastikan x1 < x2
 		if((*l).x1 > (*l).x2) {
 			(*l).x1 = (*l).x2;
 			(*l).y1 = (*l).y2;
 			(*l).x2 = x;
 			(*l).y2 = y;
-			x = (*l).x1; 
+			x = (*l).x1;
 			y = (*l).y1;
 		}
-		
+
 		// Repeat printing the next pixel until the line is painted
 		while(x <= (*l).x2) {
-			
+
 			// Draw the next pixel
 			if (!isOverflow(x,y)) {
 				plotPixelRGBA(x,y,(*l).r,(*l).g,(*l).b,(*l).a);
 			}
-			
+
 			// Calculate the next pixel
 			if(p < 0) {
 				p = p + 2*dy;
@@ -300,30 +300,30 @@ void drawLine(Line* l) {
 				else y--;
 			}
 			x++;
-			
+
 		}
-	
-	// If the absolute gradien is more than 1	
+
+	// If the absolute gradien is more than 1
 	} else {
-		
+
 		// Memastikan y1 < y2
 		if((*l).y1 > (*l).y2) {
 			(*l).x1 = (*l).x2;
 			(*l).y1 = (*l).y2;
 			(*l).x2 = x;
 			(*l).y2 = y;
-			x = (*l).x1; 
+			x = (*l).x1;
 			y = (*l).y1;
 		}
-		
+
 		// Repeat printing the next pixel until the line is painted
 		while(y <= (*l).y2) {
-			
+
 			// Draw the next pixel
 			if (!isOverflow(x,y)) {
 				plotPixelRGBA(x,y,(*l).r,(*l).g,(*l).b,(*l).a);
 			}
-			
+
 			// Calculate the next pixel
 			if(p < 0) {
 				p = p + 2*dx;
@@ -333,46 +333,46 @@ void drawLine(Line* l) {
 				else x--;
 			}
 			y++;
-			
+
 		}
-		
+
 	}
-	
+
 }
 
 void animateLine(Line* l, int delay, int length) {
-/* Gambar garis "l" di layar mulai dari P1 ke P2 dengan jeda "delay" 
- * nanosecond antar pewarnaan pixel; Setelah "length" buah pixel telah 
+/* Gambar garis "l" di layar mulai dari P1 ke P2 dengan jeda "delay"
+ * nanosecond antar pewarnaan pixel; Setelah "length" buah pixel telah
  * digambar, mulai hapus pixel tertua garis sesuai warna BACKGROUND
  * sebelum mewarnai pixel selanjutnya
  */
- 
+
 	// Coord. of the next point to be displayed
-	int x = (*l).x1; 
+	int x = (*l).x1;
 	int y = (*l).y1;
 	// Coord. of the next point to be deleted
-	int xw = (*l).x1; 
+	int xw = (*l).x1;
 	int yw = (*l).y1;
-		
+
 	// Calculate initial error factor
 	int dx = abs((*l).x2 - (*l).x1);
 	int dy = abs((*l).y2 - (*l).y1);
 	int p = 0;
 	int pw = 0;
-	
+
 	// If the absolute gradien is less than 1
 	if(dx >= dy) {
-		
+
 		if((*l).x1 < (*l).x2) {
-			
+
 			// Repeat printing the next pixel until the line is painted
 			while(x <= (*l).x2) {
-				
+
 				// Draw the next pixel
 				if (!isOverflow(x,y)) {
 					plotPixelRGBA(x,y,(*l).r,(*l).g,(*l).b,(*l).a);
 				}
-				
+
 				// Calculate the next pixel
 				if(p < 0) {
 					p = p + 2*dy;
@@ -382,16 +382,16 @@ void animateLine(Line* l, int delay, int length) {
 					else y--;
 				}
 				x++;
-				
+
 				// Add delay and erase trail if necessary
 				usleep(delay);
 				if(abs(x - (*l).x1) > length) {
-					
+
 					// Erase the next last pixel
 					if (!isOverflow(xw,yw)) {
 						plotPixelRGBA(xw,yw,255,255,255,0);
 					}
-					
+
 					// Calculate the next last pixel
 					if(pw < 0) {
 						pw = pw + 2*dy;
@@ -402,19 +402,19 @@ void animateLine(Line* l, int delay, int length) {
 					}
 					xw++;
 				}
-				
+
 			}
-			
+
 		} else {
-			
+
 			// Repeat printing the next pixel until the line is painted
 			while(x >= (*l).x2) {
-				
+
 				// Draw the next pixel
 				if (!isOverflow(x,y)) {
 					plotPixelRGBA(x,y,(*l).r,(*l).g,(*l).b,(*l).a);
 				}
-				
+
 				// Calculate the next pixel
 				if(p < 0) {
 					p = p + 2*dy;
@@ -424,16 +424,16 @@ void animateLine(Line* l, int delay, int length) {
 					else y--;
 				}
 				x--;
-				
+
 				// Add delay and erase trail if necessary
 				usleep(delay);
 				if(abs(x - (*l).x1) > length) {
-					
+
 					// Erase the next last pixel
 					if (!isOverflow(xw,yw)) {
 						plotPixelRGBA(xw,yw,255,255,255,0);
 					}
-					
+
 					// Calculate the next last pixel
 					if(pw < 0) {
 						pw = pw + 2*dy;
@@ -444,27 +444,27 @@ void animateLine(Line* l, int delay, int length) {
 					}
 					xw--;
 				}
-				
-			}
-			
-		}
-		
 
-	
-	// If the absolute gradien is more than 1	
+			}
+
+		}
+
+
+
+	// If the absolute gradien is more than 1
 	} else {
-		
+
 		// Memastikan y1 < y2
 		if((*l).y1 < (*l).y2) {
 
 			// Repeat printing the next pixel until the line is painted
 			while(y <= (*l).y2) {
-				
+
 				// Draw the next pixel
 				if (!isOverflow(x,y)) {
 					plotPixelRGBA(x,y,(*l).r,(*l).g,(*l).b,(*l).a);
 				}
-				
+
 				// Calculate the next pixel
 				if(p < 0) {
 					p = p + 2*dx;
@@ -474,16 +474,16 @@ void animateLine(Line* l, int delay, int length) {
 					else x--;
 				}
 				y++;
-				
+
 				// Add delay and erase trail if necessary
 				usleep(delay);
 				if(abs(y - (*l).y1) > length) {
-					
+
 					// Erase the next last pixel
 					if (!isOverflow(xw,yw)) {
 						plotPixelRGBA(xw,yw,255,255,255,0);
 					}
-					
+
 					// Calculate the next last pixel
 					if(pw < 0) {
 						pw = pw + 2*dx;
@@ -494,19 +494,19 @@ void animateLine(Line* l, int delay, int length) {
 					}
 					yw++;
 				}
-				
+
 			}
 
 		} else {
-			
+
 			// Repeat printing the next pixel until the line is painted
 			while(y >= (*l).y2) {
-				
+
 				// Draw the next pixel
 				if (!isOverflow(x,y)) {
 					plotPixelRGBA(x,y,(*l).r,(*l).g,(*l).b,(*l).a);
 				}
-				
+
 				// Calculate the next pixel
 				if(p < 0) {
 					p = p + 2*dx;
@@ -516,16 +516,16 @@ void animateLine(Line* l, int delay, int length) {
 					else x--;
 				}
 				y--;
-				
+
 				// Add delay and erase trail if necessary
 				usleep(delay);
 				if(abs(y - (*l).y1) > length) {
-					
+
 					// Erase the next last pixel
 					if (!isOverflow(xw,yw)) {
 						plotPixelRGBA(xw,yw,255,255,255,0);
 					}
-					
+
 					// Calculate the next last pixel
 					if(pw < 0) {
 						pw = pw + 2*dx;
@@ -536,11 +536,11 @@ void animateLine(Line* l, int delay, int length) {
 					}
 					yw--;
 				}
-				
+
 			}
-		
+
 		}
-		
+
 	}
 
 }
@@ -554,35 +554,35 @@ void floodFill(int x,int y, int r,int g,int b,int a, int rb,int gb,int bb,int ab
 	if(!isPixelColor(x,y, r,g,b,a)) {
 		if(!isPixelColor(x,y, rb,gb,bb,ab)) {
 			if((!isOverflow(x,y)) ) {
-				
+
 				plotPixelRGBA(x,y, r,g,b,a);
 				floodFill(x+1,y, r,g,b,a, rb,gb,bb,ab);
 				floodFill(x-1,y, r,g,b,a, rb,gb,bb,ab);
 				floodFill(x,y+1, r,g,b,a, rb,gb,bb,ab);
 				floodFill(x,y-1, r,g,b,a, rb,gb,bb,ab);
-				
+
 			}
 		}
 	}
-	
+
 }
 
 
 // STRUKTUR DATA DAN METODE PENGGAMBARAN POLYLINE----------------------------------------------------------- //
 
 typedef struct {
-	
+
 	int x[100];
 	int y[100];
-	
+
 	// The coord. of this Polyline firepoint
 	int xp; int yp;
-	
+
 	int PointCount; // Jumlah end-point dalam polyline, selalu >1
-	
+
 	// Encoding warna outline dalam RGBA / RGB
 	int r; int g; int b; int a;
-	
+
 } PolyLine;
 
 void initPolyline(PolyLine* p, int rx, int gx, int bx, int ax) {
@@ -598,13 +598,13 @@ void addEndPoint(PolyLine* p, int _x, int _y) {
 }
 
 void drawPolylineOutline(PolyLine* p) {
-	
+
 	int i; Line l;
 	for(i=1; i<(*p).PointCount; i++) {
 		initLine(&l, (*p).x[i-1], (*p).y[i-1], (*p).x[i], (*p).y[i] ,(*p).r, (*p).g, (*p).b, (*p).a);
 		drawLine(&l);
 	}
-	
+
 	initLine(&l, (*p).x[i-1], (*p).y[i-1], (*p).x[0], (*p).y[0] ,(*p).r, (*p).g, (*p).b, (*p).a);
 	drawLine(&l);
 }
@@ -622,7 +622,7 @@ void fillPolyline(PolyLine* p, int rx, int gx, int bx, int ax) {
 // METODE ANIMASI POLYLINE---------------------------------------------------------------------------------- //
 
 void deletePolyline(PolyLine* p) {
-	
+
 	fillPolyline(p, 0,0,0,0);
 	int r = (*p).r;
 	int g = (*p).g;
@@ -637,36 +637,76 @@ void deletePolyline(PolyLine* p) {
 	(*p).g = g;
 	(*p).b = b;
 	(*p).a = a;
-	
+
 }
 
 // Warning, will remove fill color and only redraw outline
 void movePolyline(PolyLine* p, int dx, int dy) {
-	
+
 	deletePolyline(p);
-	
+
 	(*p).xp += dx;
 	(*p).yp += dy;
-	
+
 	int i;
 	for(i=0; i<(*p).PointCount; i++) {
 		(*p).x[i] += dx;
 		(*p).y[i] += dy;
 	}
-	
+
 	drawPolylineOutline(p);
 }
 
 
 // --------------------------------------------------------------------------------------------------------- //
+// void draw_circle(double cx, double cy, int radius)
+// {
+// 	inline void plot4points(double cx, double cy, double x, double y)
+// 	{
+// 		drawLine(cx + x, cy + y);
+// 	  drawLine(cx - x, cy + y);
+// 		drawLine(cx + x, cy - y);
+// 		drawLine(cx - x, cy - y);
+// 	}
+//
+// 	inline void plot8points(double cx, double cy, double x, double y)
+// 	{
+// 		plot4points(cx, cy, x, y);
+// 		plot4points(cx, cy, y, x);
+// 	}
+//
+// 	int error = -radius;
+// 	double x = radius;
+// 	double y = 0;
+//
+// 	while (x >= y)
+// 	{
+// 		plot8points(cx, cy, x, y);
+//
+// 		error += y;
+// 		y++;
+// 		error += y;
+//
+// 		if (error >= 0)
+// 		{
+// 			error += -x;
+// 			x--;
+// 			error += -x;
+// 		}
+// 	}
+// }
 
+
+
+
+// --------------------------------------------------------------------------------------------------------- //
 int main() {
-	
+
     initScreen();
     clearScreen();
-	
+
 	PolyLine p;
-	initPolyline(&p, 120, 120, 120, 0);
+	initPolyline(&p, 255, 255, 255, 0);
 	addEndPoint(&p, 100, 100);
 	addEndPoint(&p, 100, 200);
 	addEndPoint(&p, 200, 200);
@@ -674,14 +714,13 @@ int main() {
 	setFirePoint(&p, 150, 150);
 	drawPolylineOutline(&p);
 	fillPolyline(&p, 100,0,0,0);
-	
+
 	usleep(100000);
 	deletePolyline(&p);
 	movePolyline(&p, 10,10);
 	fillPolyline(&p, 100,0,0,0);
-	
+
     terminate();
 
     return 0;
  }
-
