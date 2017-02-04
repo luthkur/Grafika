@@ -13,6 +13,15 @@ struct fb_fix_screeninfo finfo;     // Struct Fixed Screeninfo
 long int screensize = 0;            // Ukuran data framebuffer
 char *fbp = 0;                      // Framebuffer di memori internal
 
+int planeCrash = 0;					// 0 if the plane is still flying
+void *startPlane(void *);			// The thread that handle the plane
+	
+int dir = 1;						// The current direction of the turret, 0 = LEFT, 1 = MIDDLE, 2 = RIGHT
+void *turretHandler(void *);		// The thread that handle the turret and its direction
+
+void *ioHandler(void *);			// The thread that handle the bullet shooting
+
+
 // UTILITY PROCEDURE----------------------------------------------------------------------------------------- //
 
 int isOverflow(int _x , int _y) {
@@ -659,6 +668,115 @@ void movePolyline(PolyLine* p, int dx, int dy) {
 }
 
 
+// METODE ANIMASI PESAWAT----------------------------------------------------------------------------------- //
+
+void *startPlane(void *null) {
+
+	PolyLine plane1,plane2,plane3,plane4,plane5;
+	while(1) {
+		
+		// Initiate the plane, should be offscreen to the right of the screen
+		// May be changed according to the screensize
+		initPolyline(&plane1, 255, 255, 255, 0);
+		addEndPoint(&plane1, 500, 200);
+		addEndPoint(&plane1, 400, 300);
+		addEndPoint(&plane1, 600, 300);
+		addEndPoint(&plane1, 900, 300);
+		addEndPoint(&plane1, 900, 100);
+		addEndPoint(&plane1, 700, 200);
+		addEndPoint(&plane1, 600, 200);
+		initPolyline(&plane2, 255, 255, 255, 0);
+		addEndPoint(&plane2, 500, 300);
+		addEndPoint(&plane2, 700, 450);
+		addEndPoint(&plane2, 700, 300);
+		initPolyline(&plane3, 255, 255, 255, 0);
+		addEndPoint(&plane3, 500, 200);
+		addEndPoint(&plane3, 700, 50);
+		addEndPoint(&plane3, 700, 200);
+		initPolyline(&plane4, 255, 255, 255, 0);
+		addEndPoint(&plane4, 800, 300);
+		addEndPoint(&plane4, 900, 400);
+		addEndPoint(&plane4, 900, 300);
+		initPolyline(&plane5, 255, 255, 255, 0);
+		addEndPoint(&plane5, 800, 200);
+		addEndPoint(&plane5, 900, 100);
+		addEndPoint(&plane5, 900, 200);
+		drawPolylineOutline(&plane1);
+		drawPolylineOutline(&plane2);
+		drawPolylineOutline(&plane3);
+		drawPolylineOutline(&plane4);
+		drawPolylineOutline(&plane5);
+		
+		// NEED TO COLOR THE PLANE HERE
+		
+		// ITERATE MOVE PLANE LEFT AND SLEEP, IF PLANE NO LONGER VISIBLE, 
+		// RESET THE PLANE (EXIT LOOP)
+		// DURING EACH LOOP CHECK THE VALUE OF planeCrash VARIABLE
+		// IF ==1, EXIT THE LOOP INTO THE CRASH ANIMATION
+		
+	}
+	
+	// ANIMATE THE CRASH FOR EACH POLYLINE 1-5 HERE
+	
+	return;
+}
+
+
+// METODE HANDLER THREAD TURRET----------------------------------------------------------------------------- //
+
+void drawTurret(int dir) {
+	
+	// DRAW THE TURRET WITH THE APPROPRIATE DIRECTION ACCORDING TO dir PARAMETER
+	// 0 = LEFT, 1 = MIDDLE, 2 = RIGHT
+	
+	return;
+}
+
+void *turretHandler(void *null) {
+	
+	while(planeCrash==0) {
+		
+		drawTurret(dir);
+		dir++;
+		if(dir==3) dir = 0;
+    
+	}
+	
+	return;
+}
+
+
+// METODE HANDLER THREAD PELURU----------------------------------------------------------------------------- //
+
+void animateBullet(int dir) {
+	
+	// DRAW THE BULLET SHOOTING TO A DIRECTION FROM THE TURRET
+	// 0 = LEFT, 1 = MIDDLE, 2 = RIGHT
+	// TERMINATE ONCE THE BULLET DISAPEAR OR HIT THE PLANE
+	
+	// HIT COLLISION DETECTION ALSO HAPPEN HERE
+	
+	return;
+}
+
+void *ioHandler(void *null) {
+	
+	char ch;
+	while(1) {
+		
+		ch = getchar();
+		if (ch == '\n') {
+			
+			animateBullet(dir);
+			if(planeCrash==0) return;
+			
+		}
+		
+	}
+	
+}
+
+
 // --------------------------------------------------------------------------------------------------------- //
 // void draw_circle(double cx, double cy, int radius)
 // {
@@ -697,61 +815,22 @@ void movePolyline(PolyLine* p, int dx, int dy) {
 // 	}
 // }
 
-
-
-
 // --------------------------------------------------------------------------------------------------------- //
+
 int main() {
 
     initScreen();
     clearScreen();
-
-	PolyLine p;
-  PolyLine plane1,plane2,plane3,plane4,plane5;
-	initPolyline(&p, 255, 255, 255, 0);
-  initPolyline(&plane1, 255, 255, 255, 0);
-  addEndPoint(&plane1, 500, 200);
-  addEndPoint(&plane1, 400, 300);
-  addEndPoint(&plane1, 600, 300);
-  addEndPoint(&plane1, 900, 300);
-  addEndPoint(&plane1, 900, 100);
-  addEndPoint(&plane1, 700, 200);
-  addEndPoint(&plane1, 600, 200);
-  initPolyline(&plane2, 255, 255, 255, 0);
-  addEndPoint(&plane2, 500, 300);
-  addEndPoint(&plane2, 700, 450);
-  addEndPoint(&plane2, 700, 300);
-  initPolyline(&plane3, 255, 255, 255, 0);
-  addEndPoint(&plane3, 500, 200);
-  addEndPoint(&plane3, 700, 50);
-  addEndPoint(&plane3, 700, 200);
-  initPolyline(&plane4, 255, 255, 255, 0);
-  addEndPoint(&plane4, 800, 300);
-  addEndPoint(&plane4, 900, 400);
-  addEndPoint(&plane4, 900, 300);
-  initPolyline(&plane5, 255, 255, 255, 0);
-  addEndPoint(&plane5, 800, 200);
-  addEndPoint(&plane5, 900, 100);
-  addEndPoint(&plane5, 900, 200);
-  drawPolylineOutline(&plane1);
-  drawPolylineOutline(&plane2);
-  drawPolylineOutline(&plane3);
-  drawPolylineOutline(&plane4);
-  drawPolylineOutline(&plane5);
-	addEndPoint(&p, 100, 100);
-	addEndPoint(&p, 100, 200);
-	addEndPoint(&p, 200, 200);
-	addEndPoint(&p, 200, 100);
-	setFirePoint(&p, 150, 150);
-	drawPolylineOutline(&p);
-	fillPolyline(&p, 10,0,0,0);
-
-	usleep(100000);
-	deletePolyline(&p);
-	 movePolyline(&p, 10,10);
-	//fillPolyline(&p, 100,0,0,0);
-
+    
+	pthread_t planeThread, turretThread, ioThread;
+    pthread_create(&planeThread,NULL,startPlane,NULL);
+	pthread_create(&turretThread,NULL,turretHandler,NULL);
+	pthread_create(&ioThread,NULL,ioHandler,NULL);
+	
+	pthread_join(turretThread, NULL);
+	pthread_join(ioThread, NULL);
+    pthread_join(planeThread, NULL);
+    
     terminate();
-
     return 0;
  }
