@@ -15,7 +15,7 @@ char *fbp = 0;                      // Framebuffer di memori internal
 
 // UTILITY PROCEDURE----------------------------------------------------------------------------------------- //
 
-int isOverflow(int _x , int _y){
+int isOverflow(int _x , int _y) {
 //Cek apakah kooordinat (x,y) sudah melewati batas layar
     int result;
     if ( _x > vinfo.xres ||  _y > vinfo.yres -20 ) {
@@ -134,10 +134,11 @@ void initScreen() {
 
 void clearScreen() {
 //Mewarnai latar belakang screen dengan warna putih
-    int x;
-    int y;
-    for (y = 0; y < vinfo.yres - 15 ;y++) {
-		for (x = 0; x < vinfo.xres  ; x++) {
+    int x = 0;
+    int y = 0;
+    printf("wtf\n");
+    for (y = 0; y < vinfo.yres - 150 ;y++) {
+		for (x = 0; x < vinfo.xres ; x++) {
 			if (vinfo.bits_per_pixel == 32) {
                 plotPixelRGBA(x,y,0,0,0,0);
             } else  { //asumsi mode 16 bit per piksel
@@ -706,19 +707,49 @@ int main() {
     clearScreen();
 
 	PolyLine p;
+  PolyLine plane1,plane2,plane3,plane4,plane5;
 	initPolyline(&p, 255, 255, 255, 0);
+  initPolyline(&plane1, 255, 255, 255, 0);
+  addEndPoint(&plane1, 500, 200);
+  addEndPoint(&plane1, 400, 300);
+  addEndPoint(&plane1, 600, 300);
+  addEndPoint(&plane1, 900, 300);
+  addEndPoint(&plane1, 900, 100);
+  addEndPoint(&plane1, 700, 200);
+  addEndPoint(&plane1, 600, 200);
+  initPolyline(&plane2, 255, 255, 255, 0);
+  addEndPoint(&plane2, 500, 300);
+  addEndPoint(&plane2, 700, 450);
+  addEndPoint(&plane2, 700, 300);
+  initPolyline(&plane3, 255, 255, 255, 0);
+  addEndPoint(&plane3, 500, 200);
+  addEndPoint(&plane3, 700, 50);
+  addEndPoint(&plane3, 700, 200);
+  initPolyline(&plane4, 255, 255, 255, 0);
+  addEndPoint(&plane4, 800, 300);
+  addEndPoint(&plane4, 900, 400);
+  addEndPoint(&plane4, 900, 300);
+  initPolyline(&plane5, 255, 255, 255, 0);
+  addEndPoint(&plane5, 800, 200);
+  addEndPoint(&plane5, 900, 100);
+  addEndPoint(&plane5, 900, 200);
+  drawPolylineOutline(&plane1);
+  drawPolylineOutline(&plane2);
+  drawPolylineOutline(&plane3);
+  drawPolylineOutline(&plane4);
+  drawPolylineOutline(&plane5);
 	addEndPoint(&p, 100, 100);
 	addEndPoint(&p, 100, 200);
 	addEndPoint(&p, 200, 200);
 	addEndPoint(&p, 200, 100);
 	setFirePoint(&p, 150, 150);
 	drawPolylineOutline(&p);
-	fillPolyline(&p, 100,0,0,0);
+	fillPolyline(&p, 10,0,0,0);
 
 	usleep(100000);
 	deletePolyline(&p);
-	movePolyline(&p, 10,10);
-	fillPolyline(&p, 100,0,0,0);
+	 movePolyline(&p, 10,10);
+	//fillPolyline(&p, 100,0,0,0);
 
     terminate();
 
