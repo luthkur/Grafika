@@ -6,6 +6,7 @@
 #include <sys/mman.h>
 #include <sys/ioctl.h>
 #include <time.h>
+#include <math.h>
 
 int fbfd = 0;                       // Filebuffer Filedescriptor
 struct fb_var_screeninfo vinfo;     // Struct Variable Screeninfo
@@ -607,6 +608,11 @@ void addEndPoint(PolyLine* p, int _x, int _y) {
 	(*p).PointCount++;
 }
 
+// i = 1 - 0, 1
+// i = 2 - 1, 2
+// i = 3 - 2, 3
+// i = 4 - 3, 0
+
 void drawPolylineOutline(PolyLine* p) {
 
 	int i; Line l;
@@ -685,6 +691,7 @@ void *startPlane(void *null) {
 		addEndPoint(&plane1, 900, 100);
 		addEndPoint(&plane1, 700, 200);
 		addEndPoint(&plane1, 600, 200);
+		
 		initPolyline(&plane2, 255, 255, 255, 0);
 		addEndPoint(&plane2, 500, 300);
 		addEndPoint(&plane2, 700, 450);
@@ -701,7 +708,9 @@ void *startPlane(void *null) {
 		addEndPoint(&plane5, 800, 200);
 		addEndPoint(&plane5, 900, 100);
 		addEndPoint(&plane5, 900, 200);
+		
 		drawPolylineOutline(&plane1);
+		
 		drawPolylineOutline(&plane2);
 		drawPolylineOutline(&plane3);
 		drawPolylineOutline(&plane4);
@@ -729,10 +738,143 @@ void drawTurret(int dir) {
 	// DRAW THE TURRET WITH THE APPROPRIATE DIRECTION ACCORDING TO dir PARAMETER
 	// 0 = LEFT, 1 = MIDDLE, 2 = RIGHT
 	
-	return;
+	// THE END POINT COORDINATE DEPENDS ON YOUR SCREEN'S WIDTH AND HEIGHT
+	
+	/**
+	 * STEPS:
+	 * - clear the previous turret
+	 * - initiate a new turret with the specified direction
+	 * - add the end point (x0, y0 ; x1, y1 ; x2, y2 ; etc) of the turret
+	 * - draw the turret
+	 */
+		
+	PolyLine turretLeftBody, turretMiddleBody, turretRightBody;
+	
+	int x_vinfo[15], y_vinfo[15];
+	int xnew, ynew;
+	int centralPointX, centralPointY;
+ 	
+ 	// turret's body		
+ 	x_vinfo[0] = (vinfo.xres / 2) - 50;
+	y_vinfo[0] = vinfo.yres - 200;
+	x_vinfo[1] = (vinfo.xres / 2) + 50;
+	y_vinfo[1] = vinfo.yres - 200;
+	x_vinfo[2] = (vinfo.xres / 2) + 80;
+	y_vinfo[2] = vinfo.yres - 180;
+	x_vinfo[3] = (vinfo.xres / 2) + 80;
+	y_vinfo[3] = vinfo.yres - 80;
+	x_vinfo[4] = (vinfo.xres / 2) + 50;
+	y_vinfo[4] = vinfo.yres - 60;
+	x_vinfo[5] = (vinfo.xres / 2) - 50;
+	y_vinfo[5] = vinfo.yres - 60;
+	x_vinfo[6] = (vinfo.xres / 2) - 80;
+	y_vinfo[6] = vinfo.yres - 80;
+	x_vinfo[7] = (vinfo.xres / 2) - 80;
+	y_vinfo[7] = vinfo.yres - 180;
+	
+	// turret's shooter
+	x_vinfo[8] = (vinfo.xres / 2) - 50;
+	y_vinfo[8] = vinfo.yres - 200;
+	x_vinfo[9] = (vinfo.xres / 2) - 20;
+	y_vinfo[9] = vinfo.yres - 200;
+	x_vinfo[10] = (vinfo.xres / 2) - 20;
+	y_vinfo[10] = vinfo.yres - 300;
+	x_vinfo[11] = (vinfo.xres / 2) + 20;
+	y_vinfo[11] = vinfo.yres - 300;
+	x_vinfo[12] = (vinfo.xres / 2) + 20;
+	y_vinfo[12] = vinfo.yres - 200;
+	
+	
+		if (dir == 0) {
+			
+			// initiate turret's body
+			initPolyline(&turretLeftBody, 255, 255, 255, 0);
+			
+			// rotating around point (vinfo.xres / 2, vinfo.yres - 120)
+			centralPointX = vinfo.xres / 2;
+			centralPointY = vinfo.yres - 120;
+			
+			for (int ii = 0; ii < 13; ii++) {
+			
+				xnew = cos(100) * (x_vinfo[ii] - centralPointX) - sin(100) * (y_vinfo[ii] - centralPointY) + centralPointX;
+				ynew = sin(100) * (x_vinfo[ii] - centralPointX) + cos(100) * (y_vinfo[ii] - centralPointY) + centralPointY;
+				 
+				addEndPoint(&turretLeftBody, xnew, ynew);
+			
+			}
+			
+			// draw
+			drawPolylineOutline(&turretLeftBody);
+			
+			usleep(500000);
+			
+			// clear
+			deletePolyline(&turretLeftBody);
+	
+		} else if (dir == 1) {
+				
+			// initiate turret's body
+			initPolyline(&turretMiddleBody, 255, 255, 255, 0);
+			
+			// end point turret's body
+			addEndPoint(&turretMiddleBody, (vinfo.xres / 2) - 50, vinfo.yres - 200);
+			addEndPoint(&turretMiddleBody, (vinfo.xres / 2) + 50, vinfo.yres - 200);
+			addEndPoint(&turretMiddleBody, (vinfo.xres / 2) + 80, vinfo.yres - 180);
+			addEndPoint(&turretMiddleBody, (vinfo.xres / 2) + 80, vinfo.yres - 80);
+			addEndPoint(&turretMiddleBody, (vinfo.xres / 2) + 50, vinfo.yres - 60);
+			addEndPoint(&turretMiddleBody, (vinfo.xres / 2) - 50, vinfo.yres - 60);
+			addEndPoint(&turretMiddleBody, (vinfo.xres / 2) - 80, vinfo.yres - 80);
+			addEndPoint(&turretMiddleBody, (vinfo.xres / 2) - 80, vinfo.yres - 180);
+			
+			// combined - experiment
+			addEndPoint(&turretMiddleBody, (vinfo.xres / 2) - 50, vinfo.yres - 200);
+			addEndPoint(&turretMiddleBody, (vinfo.xres / 2) - 20, vinfo.yres - 200);
+			addEndPoint(&turretMiddleBody, (vinfo.xres / 2) - 20, vinfo.yres - 300);
+			addEndPoint(&turretMiddleBody, (vinfo.xres / 2) + 20, vinfo.yres - 300);
+			addEndPoint(&turretMiddleBody, (vinfo.xres / 2) + 20, vinfo.yres - 200);
+			
+			// draw
+			drawPolylineOutline(&turretMiddleBody);
+			
+			usleep(500000);
+			
+			// clear
+			deletePolyline(&turretMiddleBody);
+	
+		} else if (dir == 2) {
+		
+			// initiate turret's body
+			initPolyline(&turretRightBody, 255, 255, 255, 0);
+			
+			// rotating around point (vinfo.xres / 2, vinfo.yres - 120)
+			centralPointX = vinfo.xres / 2;
+			centralPointY = vinfo.yres - 120;
+			
+			for (int ii = 0; ii < 13; ii++) {
+			
+				xnew = cos(340) * (x_vinfo[ii] - centralPointX) - sin(340) * (y_vinfo[ii] - centralPointY) + centralPointX;
+				ynew = sin(340) * (x_vinfo[ii] - centralPointX) + cos(340) * (y_vinfo[ii] - centralPointY) + centralPointY;
+				
+				addEndPoint(&turretRightBody, xnew, ynew);
+			
+			}
+			
+			// draw
+			drawPolylineOutline(&turretRightBody);
+		
+			usleep(500000);
+			
+			// clear
+			deletePolyline(&turretRightBody);
+	
+		}
+		
+		
 }
 
 void *turretHandler(void *null) {
+	
+	printf("turretHandler %d %d\n", planeCrash, dir);
 	
 	while(planeCrash==0) {
 		
@@ -821,7 +963,7 @@ int main() {
 
     initScreen();
     clearScreen();
-    
+       
 	pthread_t planeThread, turretThread, ioThread;
     pthread_create(&planeThread,NULL,startPlane,NULL);
 	pthread_create(&turretThread,NULL,turretHandler,NULL);
