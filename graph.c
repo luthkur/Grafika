@@ -816,7 +816,7 @@ void drawTurret(int dir) {
 			
 			// draw
 			drawPolylineOutline(&turretLeftBody);
-			//fillPolyline(&turretLeftBody, 255, 0, 0, 0);
+			fillPolyline(&turretLeftBody, 255, 0, 0, 0);
 			
 			usleep(500000);
 			
@@ -983,6 +983,8 @@ void draw_circle(double cx, double cy, int radius)
 		}
 	}
 }
+
+
 
 // --------------------------------------------------------------------------------------------------------- //
 
