@@ -99,7 +99,7 @@ void plotPixelRGBA(int _x, int _y, int r, int g, int b, int a) {
 int isPixelColor(int _x, int _y, int r, int g, int b, int a) {
 	if(!isOverflow(_x,_y)) {
 		long int location = (_x+vinfo.xoffset) * (vinfo.bits_per_pixel/8) + (_y+vinfo.yoffset) * finfo.line_length;
-		if((*(fbp + location) == b)&&(*(fbp + location + 1) == g)&&(*(fbp + location + 2) == r)&&(*(fbp + location + 3) == a)) {
+		if((*((unsigned char *)(fbp + location)) == b)&&(*((unsigned char *)(fbp + location + 1)) == g)&&(*((unsigned char *)(fbp + location + 2)) == r)&&(*((unsigned char *)(fbp + location + 3)) == a)) {
 			return 1;
 		} else return 0;
 	} else return 0;
@@ -351,7 +351,7 @@ void drawLine(Line* l) {
 
 }
 
-void animateLine(Line* l, int delay, int length) {
+int animateLine(Line* l, int delay, int length) {
 /* Gambar garis "l" di layar mulai dari P1 ke P2 dengan jeda "delay"
  * nanosecond antar pewarnaan pixel; Setelah "length" buah pixel telah
  * digambar, mulai hapus pixel tertua garis sesuai warna BACKGROUND
@@ -371,6 +371,8 @@ void animateLine(Line* l, int delay, int length) {
 	int p = 0;
 	int pw = 0;
 
+	int collision = 0;
+
 	// If the absolute gradien is less than 1
 	if(dx >= dy) {
 
@@ -381,6 +383,7 @@ void animateLine(Line* l, int delay, int length) {
 
 				// Draw the next pixel
 				if (!isOverflow(x,y)) {
+					if (isPixelColor(x,y,255,255,0,0)) return 1;
 					plotPixelRGBA(x,y,(*l).r,(*l).g,(*l).b,(*l).a);
 				}
 
@@ -400,7 +403,7 @@ void animateLine(Line* l, int delay, int length) {
 
 					// Erase the next last pixel
 					if (!isOverflow(xw,yw)) {
-						plotPixelRGBA(xw,yw,255,255,255,0);
+						plotPixelRGBA(xw,yw,0,0,0,0);
 					}
 
 					// Calculate the next last pixel
@@ -423,6 +426,7 @@ void animateLine(Line* l, int delay, int length) {
 
 				// Draw the next pixel
 				if (!isOverflow(x,y)) {
+					if (isPixelColor(x,y,255,255,0,0)) return 1;
 					plotPixelRGBA(x,y,(*l).r,(*l).g,(*l).b,(*l).a);
 				}
 
@@ -440,9 +444,9 @@ void animateLine(Line* l, int delay, int length) {
 				usleep(delay);
 				if(abs(x - (*l).x1) > length) {
 
-					// Erase the next last pixel
+					// Erase the next la0st pixel
 					if (!isOverflow(xw,yw)) {
-						plotPixelRGBA(xw,yw,255,255,255,0);
+						plotPixelRGBA(xw,yw,0,0,0,0);
 					}
 
 					// Calculate the next last pixel
@@ -473,6 +477,7 @@ void animateLine(Line* l, int delay, int length) {
 
 				// Draw the next pixel
 				if (!isOverflow(x,y)) {
+					if (isPixelColor(x,y,255,255,0,0)) return 1;
 					plotPixelRGBA(x,y,(*l).r,(*l).g,(*l).b,(*l).a);
 				}
 
@@ -492,7 +497,7 @@ void animateLine(Line* l, int delay, int length) {
 
 					// Erase the next last pixel
 					if (!isOverflow(xw,yw)) {
-						plotPixelRGBA(xw,yw,255,255,255,0);
+						plotPixelRGBA(xw,yw,0,0,0,0);
 					}
 
 					// Calculate the next last pixel
@@ -515,6 +520,7 @@ void animateLine(Line* l, int delay, int length) {
 
 				// Draw the next pixel
 				if (!isOverflow(x,y)) {
+					if (isPixelColor(x,y,255,255,0,0)) return 1;
 					plotPixelRGBA(x,y,(*l).r,(*l).g,(*l).b,(*l).a);
 				}
 
@@ -534,7 +540,7 @@ void animateLine(Line* l, int delay, int length) {
 
 					// Erase the next last pixel
 					if (!isOverflow(xw,yw)) {
-						plotPixelRGBA(xw,yw,255,255,255,0);
+						plotPixelRGBA(xw,yw,0,0,0,0);
 					}
 
 					// Calculate the next last pixel
@@ -683,7 +689,7 @@ void *startPlane(void *null) {
 		
 		// Initiate the plane, should be offscreen to the right of the screen
 		// May be changed according to the screensize
-		initPolyline(&plane1, 255, 255, 255, 0);
+		initPolyline(&plane1, 255, 255, 0, 0);
 		addEndPoint(&plane1, 500, 200);
 		addEndPoint(&plane1, 400, 300);
 		addEndPoint(&plane1, 600, 300);
@@ -692,19 +698,19 @@ void *startPlane(void *null) {
 		addEndPoint(&plane1, 700, 200);
 		addEndPoint(&plane1, 600, 200);
 		
-		initPolyline(&plane2, 255, 255, 255, 0);
+		initPolyline(&plane2, 255, 255, 0, 0);
 		addEndPoint(&plane2, 500, 300);
 		addEndPoint(&plane2, 700, 450);
 		addEndPoint(&plane2, 700, 300);
-		initPolyline(&plane3, 255, 255, 255, 0);
+		initPolyline(&plane3, 255, 255, 0, 0);
 		addEndPoint(&plane3, 500, 200);
 		addEndPoint(&plane3, 700, 50);
 		addEndPoint(&plane3, 700, 200);
-		initPolyline(&plane4, 255, 255, 255, 0);
+		initPolyline(&plane4, 255, 255, 0, 0);
 		addEndPoint(&plane4, 800, 300);
 		addEndPoint(&plane4, 900, 400);
 		addEndPoint(&plane4, 900, 300);
-		initPolyline(&plane5, 255, 255, 255, 0);
+		initPolyline(&plane5, 255, 255, 0, 0);
 		addEndPoint(&plane5, 800, 200);
 		addEndPoint(&plane5, 900, 100);
 		addEndPoint(&plane5, 900, 200);
@@ -753,6 +759,12 @@ void drawTurret(int dir) {
 	int x_vinfo[15], y_vinfo[15];
 	int xnew, ynew;
 	int centralPointX, centralPointY;
+	centralPointX = vinfo.xres / 2;
+	centralPointY = vinfo.yres - 120;
+	setFirePoint(&turretLeftBody, centralPointX, centralPointY);
+	setFirePoint(&turretMiddleBody, centralPointX, centralPointY);
+	setFirePoint(&turretRightBody, centralPointX, centralPointY);
+	
  	
  	// turret's body		
  	x_vinfo[0] = (vinfo.xres / 2) - 50;
@@ -791,10 +803,9 @@ void drawTurret(int dir) {
 			initPolyline(&turretLeftBody, 255, 255, 255, 0);
 			
 			// rotating around point (vinfo.xres / 2, vinfo.yres - 120)
-			centralPointX = vinfo.xres / 2;
-			centralPointY = vinfo.yres - 120;
 			
-			for (int ii = 0; ii < 13; ii++) {
+			int ii;
+			for (ii = 0; ii < 13; ii++) {
 			
 				xnew = cos(100) * (x_vinfo[ii] - centralPointX) - sin(100) * (y_vinfo[ii] - centralPointY) + centralPointX;
 				ynew = sin(100) * (x_vinfo[ii] - centralPointX) + cos(100) * (y_vinfo[ii] - centralPointY) + centralPointY;
@@ -805,6 +816,7 @@ void drawTurret(int dir) {
 			
 			// draw
 			drawPolylineOutline(&turretLeftBody);
+			//fillPolyline(&turretLeftBody, 255, 0, 0, 0);
 			
 			usleep(500000);
 			
@@ -849,8 +861,8 @@ void drawTurret(int dir) {
 			// rotating around point (vinfo.xres / 2, vinfo.yres - 120)
 			centralPointX = vinfo.xres / 2;
 			centralPointY = vinfo.yres - 120;
-			
-			for (int ii = 0; ii < 13; ii++) {
+			int ii;
+			for (ii = 0; ii < 13; ii++) {
 			
 				xnew = cos(340) * (x_vinfo[ii] - centralPointX) - sin(340) * (y_vinfo[ii] - centralPointY) + centralPointX;
 				ynew = sin(340) * (x_vinfo[ii] - centralPointX) + cos(340) * (y_vinfo[ii] - centralPointY) + centralPointY;
@@ -880,6 +892,7 @@ void *turretHandler(void *null) {
 		
 		drawTurret(dir);
 		dir++;
+		printf("%d\n", dir);
 		if(dir==3) dir = 0;
     
 	}
@@ -897,6 +910,20 @@ void animateBullet(int dir) {
 	// TERMINATE ONCE THE BULLET DISAPEAR OR HIT THE PLANE
 	
 	// HIT COLLISION DETECTION ALSO HAPPEN HERE
+
+	int xbase = vinfo.xres/2, ybase = vinfo.yres -120;
+
+	Line a;
+	int x;
+	if (dir == 0) x = xbase - 0.5*xbase;
+	else if (dir == 1) x = xbase;
+	else x = xbase + 0.5*xbase;
+	initLine(&a, xbase, ybase, x, 0, 255, 255, 255, 0);
+	int col = animateLine(&a, 100, 100);
+	if (col) printf("COLLISION\n");
+	initLine(&a, xbase, ybase, x, 0, 0, 0, 0, 0);
+	animateLine(&a, 0, 0);
+
 	
 	return;
 }
@@ -910,7 +937,7 @@ void *ioHandler(void *null) {
 		if (ch == '\n') {
 			
 			animateBullet(dir);
-			if(planeCrash==0) return;
+			if(planeCrash==10) return;
 			
 		}
 		
@@ -920,42 +947,42 @@ void *ioHandler(void *null) {
 
 
 // --------------------------------------------------------------------------------------------------------- //
-// void draw_circle(double cx, double cy, int radius)
-// {
-// 	inline void plot4points(double cx, double cy, double x, double y)
-// 	{
-// 		draw(cx + x, cy + y);
-// 	  draw(cx - x, cy + y);
-// 		draw(cx + x, cy - y);
-// 		draw(cx - x, cy - y);
-// 	}
-//
-// 	inline void plot8points(double cx, double cy, double x, double y)
-// 	{
-// 		plot4points(cx, cy, x, y);
-// 		plot4points(cx, cy, y, x);
-// 	}
-//
-// 	int error = -radius;
-// 	double x = radius;
-// 	double y = 0;
-//
-// 	while (x >= y)
-// 	{
-// 		plot8points(cx, cy, x, y);
-//
-// 		error += y;
-// 		y++;
-// 		error += y;
-//
-// 		if (error >= 0)
-// 		{
-// 			error += -x;
-// 			x--;
-// 			error += -x;
-// 		}
-// 	}
-// }
+void draw_circle(double cx, double cy, int radius)
+{
+	inline void plot4points(double cx, double cy, double x, double y)
+	{
+		plotPixelRGBA(cx + x, cy + y, 255, 255, 255, 0);
+	  plotPixelRGBA(cx - x, cy + y, 255, 255, 255, 0);
+		plotPixelRGBA(cx + x, cy - y, 255, 255, 255, 0);
+		plotPixelRGBA(cx - x, cy - y, 255, 255, 255, 0);
+	}
+
+	inline void plot8points(double cx, double cy, double x, double y)
+	{
+		plot4points(cx, cy, x, y);
+		plot4points(cx, cy, y, x);
+	}
+
+	int error = -radius;
+	double x = radius;
+	double y = 0;
+
+	while (x >= y)
+	{
+		plot8points(cx, cy, x, y);
+
+		error += y;
+		y++;
+		error += y;
+
+		if (error >= 0)
+		{
+			error += -x;
+			x--;
+			error += -x;
+		}
+	}
+}
 
 // --------------------------------------------------------------------------------------------------------- //
 
@@ -968,6 +995,9 @@ int main() {
     pthread_create(&planeThread,NULL,startPlane,NULL);
 	pthread_create(&turretThread,NULL,turretHandler,NULL);
 	pthread_create(&ioThread,NULL,ioHandler,NULL);
+
+	draw_circle(500, 500, 20);
+	floodFill(500, 500, 255,0,0,0,255,255,255,0);
 	
 	pthread_join(turretThread, NULL);
 	pthread_join(ioThread, NULL);
