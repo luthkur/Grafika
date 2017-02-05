@@ -903,6 +903,50 @@ void *turretHandler(void *null) {
 
 // METODE HANDLER THREAD PELURU----------------------------------------------------------------------------- //
 
+void drawBullet(){
+//NOTICE: IT IS STILL STATIC, THE DIRECTION IS UP
+
+	PolyLine bulletTop, bulletBody, bulletBottom;
+
+	while(1){
+	
+	initPolyline(&bulletTop, 255,0,0,0);
+	addEndPoint(&bulletTop, 300,400);
+	addEndPoint(&bulletTop, 260,500);
+	addEndPoint(&bulletTop, 340,500);
+	setFirePoint(&bulletTop, 300, 450); //TAKE THE CENTER POINT, ALWAYS
+
+	initPolyline(&bulletBody, 255,255,255,0);
+	addEndPoint(&bulletBody, 275, 501);
+	addEndPoint(&bulletBody, 325, 501);
+	addEndPoint(&bulletBody, 325, 625);
+	addEndPoint(&bulletBody, 275, 625);
+	setFirePoint(&bulletBody, 300, 550); //IF THE CENTER POINT CAN'T BE EXACT, ESTIMATE IT
+
+	initPolyline(&bulletBottom, 255,255,0,0);
+	addEndPoint(&bulletBottom, 275, 625);
+	addEndPoint(&bulletBottom, 325, 625);
+	addEndPoint(&bulletBottom, 325, 675);
+	addEndPoint(&bulletBottom, 300, 650);
+	addEndPoint(&bulletBottom, 275, 675);
+	setFirePoint(&bulletBottom, 300, 640); //ALSO THIS
+	
+	//DRAW BODY FIRST IN ORDER TO MAKE TOP AND BOTTOM BORDER NOT CHANGED, AND COLORIZE AFTER DRAWING
+	drawPolylineOutline(&bulletBody);
+	fillPolyline(&bulletBody, 255,255,255,0);
+	drawPolylineOutline(&bulletTop);
+	fillPolyline(&bulletTop, 255,0,0,0);
+	drawPolylineOutline(&bulletBottom);
+	fillPolyline(&bulletBottom, 255,255,0,0);
+
+	
+	
+	}
+
+	
+
+}
+
 void animateBullet(int dir) {
 	
 	// DRAW THE BULLET SHOOTING TO A DIRECTION FROM THE TURRET
@@ -998,13 +1042,13 @@ int main() {
 	pthread_create(&turretThread,NULL,turretHandler,NULL);
 	pthread_create(&ioThread,NULL,ioHandler,NULL);
 
-	draw_circle(500, 500, 20);
-	floodFill(500, 500, 255,0,0,0,255,255,255,0);
-	
+	//draw_circle(500, 500, 20);
+	//floodFill(500, 500, 255,0,0,0,255,255,255,0);
+	drawBullet();
 	pthread_join(turretThread, NULL);
 	pthread_join(ioThread, NULL);
     pthread_join(planeThread, NULL);
     
-    terminate();
+    //terminate();
     return 0;
  }
