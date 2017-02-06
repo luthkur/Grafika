@@ -18,7 +18,7 @@ int planeCrash = 0;					// 0 if the plane is still flying
 void *startPlane(void *);			// The thread that handle the plane
 int x_depan;
 int x_belakang;
-	
+
 int dir = 1;						// The current direction of the turret, 0 = LEFT, 1 = MIDDLE, 2 = RIGHT
 void *turretHandler(void *);		// The thread that handle the turret and its direction
 
@@ -688,7 +688,7 @@ void *startPlane(void *null) {
 
 	PolyLine plane1,plane2,plane3,plane4,plane5;
 	while(1) {
-		
+
 		// Initiate the plane, should be offscreen to the right of the screen
 		// May be changed according to the screensize
 		initPolyline(&plane1, 255, 255, 0, 0);
@@ -699,7 +699,7 @@ void *startPlane(void *null) {
 		addEndPoint(&plane1, 900, 100);
 		addEndPoint(&plane1, 700, 200);
 		addEndPoint(&plane1, 600, 200);
-		
+
 		initPolyline(&plane2, 255, 255, 0, 0);
 		addEndPoint(&plane2, 500, 300);
 		addEndPoint(&plane2, 700, 450);
@@ -716,14 +716,14 @@ void *startPlane(void *null) {
 		addEndPoint(&plane5, 800, 200);
 		addEndPoint(&plane5, 900, 100);
 		addEndPoint(&plane5, 900, 200);
-		
+
 		drawPolylineOutline(&plane1);
-		
+
 		drawPolylineOutline(&plane2);
 		drawPolylineOutline(&plane3);
 		drawPolylineOutline(&plane4);
 		drawPolylineOutline(&plane5);
-		
+
 		while (planeCrash==0){
 			movePolyline(&plane1, -5, 0);
 			movePolyline(&plane2, -5, 0);
@@ -735,16 +735,16 @@ void *startPlane(void *null) {
 			nanosleep((const struct timespec[]){{0,100000000L}},NULL);
 		}
 		// NEED TO COLOR THE PLANE HERE
-		
-		// ITERATE MOVE PLANE LEFT AND SLEEP, IF PLANE NO LONGER VISIBLE, 
+
+		// ITERATE MOVE PLANE LEFT AND SLEEP, IF PLANE NO LONGER VISIBLE,
 		// RESET THE PLANE (EXIT LOOP)
 		// DURING EACH LOOP CHECK THE VALUE OF planeCrash VARIABLE
 		// IF ==1, EXIT THE LOOP INTO THE CRASH ANIMATION
-		
+
 	}
-	
+
 	// ANIMATE THE CRASH FOR EACH POLYLINE 1-5 HERE
-	
+
 	return;
 }
 
@@ -752,12 +752,12 @@ void *startPlane(void *null) {
 // METODE HANDLER THREAD TURRET----------------------------------------------------------------------------- //
 
 void drawTurret(int dir) {
-	
+
 	// DRAW THE TURRET WITH THE APPROPRIATE DIRECTION ACCORDING TO dir PARAMETER
 	// 0 = LEFT, 1 = MIDDLE, 2 = RIGHT
-	
+
 	// THE END POINT COORDINATE DEPENDS ON YOUR SCREEN'S WIDTH AND HEIGHT
-	
+
 	/**
 	 * STEPS:
 	 * - clear the previous turret
@@ -765,9 +765,9 @@ void drawTurret(int dir) {
 	 * - add the end point (x0, y0 ; x1, y1 ; x2, y2 ; etc) of the turret
 	 * - draw the turret
 	 */
-		
+
 	PolyLine turretLeftBody, turretMiddleBody, turretRightBody;
-	
+
 	int x_vinfo[15], y_vinfo[15];
 	int xnew, ynew;
 	int centralPointX, centralPointY;
@@ -776,9 +776,9 @@ void drawTurret(int dir) {
 	setFirePoint(&turretLeftBody, centralPointX, centralPointY);
 	setFirePoint(&turretMiddleBody, centralPointX, centralPointY);
 	setFirePoint(&turretRightBody, centralPointX, centralPointY);
-	
- 	
- 	// turret's body		
+
+
+ 	// turret's body
  	x_vinfo[0] = (vinfo.xres / 2) - 50;
 	y_vinfo[0] = vinfo.yres - 200;
 	x_vinfo[1] = (vinfo.xres / 2) + 50;
@@ -795,7 +795,7 @@ void drawTurret(int dir) {
 	y_vinfo[6] = vinfo.yres - 80;
 	x_vinfo[7] = (vinfo.xres / 2) - 80;
 	y_vinfo[7] = vinfo.yres - 180;
-	
+
 	// turret's shooter
 	x_vinfo[8] = (vinfo.xres / 2) - 50;
 	y_vinfo[8] = vinfo.yres - 200;
@@ -807,39 +807,39 @@ void drawTurret(int dir) {
 	y_vinfo[11] = vinfo.yres - 300;
 	x_vinfo[12] = (vinfo.xres / 2) + 20;
 	y_vinfo[12] = vinfo.yres - 200;
-	
-	
+
+
 		if (dir == 0) {
-			
+
 			// initiate turret's body
 			initPolyline(&turretLeftBody, 255, 255, 255, 0);
-			
+
 			// rotating around point (vinfo.xres / 2, vinfo.yres - 120)
-			
+
 			int ii;
 			for (ii = 0; ii < 13; ii++) {
-			
+
 				xnew = cos(100) * (x_vinfo[ii] - centralPointX) - sin(100) * (y_vinfo[ii] - centralPointY) + centralPointX;
 				ynew = sin(100) * (x_vinfo[ii] - centralPointX) + cos(100) * (y_vinfo[ii] - centralPointY) + centralPointY;
-				 
+
 				addEndPoint(&turretLeftBody, xnew, ynew);
-			
+
 			}
-			
+
 			// draw
 			drawPolylineOutline(&turretLeftBody);
 			fillPolyline(&turretLeftBody, 255, 0, 0, 0);
-			
+
 			usleep(500000);
-			
+
 			// clear
 			deletePolyline(&turretLeftBody);
-	
+
 		} else if (dir == 1) {
-				
+
 			// initiate turret's body
 			initPolyline(&turretMiddleBody, 255, 255, 255, 0);
-			
+
 			// end point turret's body
 			addEndPoint(&turretMiddleBody, (vinfo.xres / 2) - 50, vinfo.yres - 200);
 			addEndPoint(&turretMiddleBody, (vinfo.xres / 2) + 50, vinfo.yres - 200);
@@ -849,122 +849,231 @@ void drawTurret(int dir) {
 			addEndPoint(&turretMiddleBody, (vinfo.xres / 2) - 50, vinfo.yres - 60);
 			addEndPoint(&turretMiddleBody, (vinfo.xres / 2) - 80, vinfo.yres - 80);
 			addEndPoint(&turretMiddleBody, (vinfo.xres / 2) - 80, vinfo.yres - 180);
-			
+
 			// combined - experiment
 			addEndPoint(&turretMiddleBody, (vinfo.xres / 2) - 50, vinfo.yres - 200);
 			addEndPoint(&turretMiddleBody, (vinfo.xres / 2) - 20, vinfo.yres - 200);
 			addEndPoint(&turretMiddleBody, (vinfo.xres / 2) - 20, vinfo.yres - 300);
 			addEndPoint(&turretMiddleBody, (vinfo.xres / 2) + 20, vinfo.yres - 300);
 			addEndPoint(&turretMiddleBody, (vinfo.xres / 2) + 20, vinfo.yres - 200);
-			
+
 			// draw
 			drawPolylineOutline(&turretMiddleBody);
-			
+
 			usleep(500000);
-			
+
 			// clear
 			deletePolyline(&turretMiddleBody);
-	
+
 		} else if (dir == 2) {
-		
+
 			// initiate turret's body
 			initPolyline(&turretRightBody, 255, 255, 255, 0);
-			
+
 			// rotating around point (vinfo.xres / 2, vinfo.yres - 120)
 			centralPointX = vinfo.xres / 2;
 			centralPointY = vinfo.yres - 120;
 			int ii;
 			for (ii = 0; ii < 13; ii++) {
-			
+
 				xnew = cos(340) * (x_vinfo[ii] - centralPointX) - sin(340) * (y_vinfo[ii] - centralPointY) + centralPointX;
 				ynew = sin(340) * (x_vinfo[ii] - centralPointX) + cos(340) * (y_vinfo[ii] - centralPointY) + centralPointY;
-				
+
 				addEndPoint(&turretRightBody, xnew, ynew);
-			
+
 			}
-			
+
 			// draw
 			drawPolylineOutline(&turretRightBody);
-		
+
 			usleep(500000);
-			
+
 			// clear
 			deletePolyline(&turretRightBody);
-	
+
 		}
-		
-		
+
+
 }
 
 void *turretHandler(void *null) {
-	
+
 	printf("turretHandler %d %d\n", planeCrash, dir);
-	
+
 	while(planeCrash==0) {
-		
+
 		drawTurret(dir);
 		dir++;
 		printf("%d\n", dir);
 		if(dir==3) dir = 0;
-    
+
 	}
-	
+
 	return;
 }
 
 
 // METODE HANDLER THREAD PELURU----------------------------------------------------------------------------- //
 
-void drawBullet(){
+void drawBulletUp(int x, int y){
 //NOTICE: IT IS STILL STATIC, THE DIRECTION IS UP
+//x : leftmost
+//y: topmost
 
-	PolyLine bulletTop, bulletBody, bulletBottom;
+	PolyLine bulletTop, bulletBody, bulletLeftWing, bulletRightWing;
 
 	while(1){
-	
+
 	initPolyline(&bulletTop, 255,0,0,0);
-	addEndPoint(&bulletTop, 300,400);
-	addEndPoint(&bulletTop, 260,500);
-	addEndPoint(&bulletTop, 340,500);
-	setFirePoint(&bulletTop, 300, 450); //TAKE THE CENTER POINT, ALWAYS
+	addEndPoint(&bulletTop, x+14,y+0);
+	addEndPoint(&bulletTop, x+9,y+23);
+	addEndPoint(&bulletTop, x+19,y+23);
+	setFirePoint(&bulletTop, x+14, y+15); //TAKE THE CENTER POINT, ALWAYS
 
 	initPolyline(&bulletBody, 255,255,255,0);
-	addEndPoint(&bulletBody, 275, 501);
-	addEndPoint(&bulletBody, 325, 501);
-	addEndPoint(&bulletBody, 325, 625);
-	addEndPoint(&bulletBody, 275, 625);
-	setFirePoint(&bulletBody, 300, 550); //IF THE CENTER POINT CAN'T BE EXACT, ESTIMATE IT
+	addEndPoint(&bulletBody, x+19, y+23);
+	addEndPoint(&bulletBody, x+9, y+23);
+	addEndPoint(&bulletBody, x+9, y+59);
+	addEndPoint(&bulletBody, x+19, y+59);
+	setFirePoint(&bulletBody, x+14, y+35); //IF THE CENTER POINT CAN'T BE EXACT, ESTIMATE IT
 
-	initPolyline(&bulletBottom, 255,255,0,0);
-	addEndPoint(&bulletBottom, 275, 625);
-	addEndPoint(&bulletBottom, 325, 625);
-	addEndPoint(&bulletBottom, 325, 675);
-	addEndPoint(&bulletBottom, 300, 650);
-	addEndPoint(&bulletBottom, 275, 675);
-	setFirePoint(&bulletBottom, 300, 640); //ALSO THIS
-	
+	initPolyline(&bulletLeftWing, 255,255,0,0);
+	addEndPoint(&bulletLeftWing, x+9, y+66);
+	addEndPoint(&bulletLeftWing, x, y+66);
+	addEndPoint(&bulletLeftWing, x+9, y+44);
+	setFirePoint(&bulletLeftWing, x+4, y+64); //ALSO THIS
+
+	initPolyline(&bulletRightWing, 255,255,0,0);
+	addEndPoint(&bulletRightWing, x+19, y+66);
+	addEndPoint(&bulletRightWing, x+28, y+66);
+	addEndPoint(&bulletRightWing, x+19, y+44);
+	setFirePoint(&bulletRightWing, x+25, y+64); //ALSO THIS
+
 	//DRAW BODY FIRST IN ORDER TO MAKE TOP AND BOTTOM BORDER NOT CHANGED, AND COLORIZE AFTER DRAWING
 	drawPolylineOutline(&bulletBody);
 	fillPolyline(&bulletBody, 255,255,255,0);
 	drawPolylineOutline(&bulletTop);
 	fillPolyline(&bulletTop, 255,0,0,0);
-	drawPolylineOutline(&bulletBottom);
-	fillPolyline(&bulletBottom, 255,255,0,0);
+	drawPolylineOutline(&bulletLeftWing);
+	fillPolyline(&bulletLeftWing, 255,255,0,0);
+	drawPolylineOutline(&bulletRightWing);
+	fillPolyline(&bulletRightWing, 255,255,0,0);
 
-	
-	
+
 	}
 
-	
+
+
+}
+
+void drawBulletLeft(int x, int y){
+//NOTICE: IT IS STILL STATIC, THE DIRECTION IS LEFT 30 DEGREES
+//x : leftmost
+//y: topmost
+
+	PolyLine bulletTop, bulletBody, bulletLeftWing, bulletRightWing;
+
+	while(1){
+
+	initPolyline(&bulletTop, 255,0,0,0);
+	addEndPoint(&bulletTop, x,y);
+	addEndPoint(&bulletTop, x+16,y+17);
+	addEndPoint(&bulletTop, x+8,y+24);
+	setFirePoint(&bulletTop, x+8, y+17); //TAKE THE CENTER POINT, ALWAYS
+
+	initPolyline(&bulletBody, 255,255,255,0);
+	addEndPoint(&bulletBody, x+16, y+17);
+	addEndPoint(&bulletBody, x+34, y+49);
+	addEndPoint(&bulletBody, x+26, y+55);
+	addEndPoint(&bulletBody, x+8, y+24);
+	setFirePoint(&bulletBody, x+26, y+49); //IF THE CENTER POINT CAN'T BE EXACT, ESTIMATE IT
+
+	initPolyline(&bulletLeftWing, 255,255,0,0);
+	addEndPoint(&bulletLeftWing, x+18, y+41);
+	addEndPoint(&bulletLeftWing, x+30, y+60);
+	addEndPoint(&bulletLeftWing, x+21, y+65);
+	setFirePoint(&bulletLeftWing, x+23, y+55); //ALSO THIS
+
+	initPolyline(&bulletRightWing, 255,255,0,0);
+	addEndPoint(&bulletRightWing, x+38, y+55);
+	addEndPoint(&bulletRightWing, x+46, y+50);
+	addEndPoint(&bulletRightWing, x+27, y+36);
+	setFirePoint(&bulletRightWing, x+38, y+50); //ALSO THIS
+
+	//DRAW BODY FIRST IN ORDER TO MAKE TOP AND BOTTOM BORDER NOT CHANGED, AND COLORIZE AFTER DRAWING
+	drawPolylineOutline(&bulletBody);
+	fillPolyline(&bulletBody, 255,255,255,0);
+	drawPolylineOutline(&bulletTop);
+	fillPolyline(&bulletTop, 255,0,0,0);
+	drawPolylineOutline(&bulletLeftWing);
+	fillPolyline(&bulletLeftWing, 255,255,0,0);
+	drawPolylineOutline(&bulletRightWing);
+	fillPolyline(&bulletRightWing, 255,255,0,0);
+
+
+	}
+
+
+
+}
+
+void drawBulletRight(int x, int y){
+//NOTICE: IT IS STILL STATIC, THE DIRECTION IS RIGHT 30 DEGREES
+//x : leftmost
+//y: topmost
+
+	PolyLine bulletTop, bulletBody, bulletLeftWing, bulletRightWing;
+
+	while(1){
+
+	initPolyline(&bulletTop, 255,0,0,0);
+	addEndPoint(&bulletTop, x+47,y);
+	addEndPoint(&bulletTop, x+30,y+18);
+	addEndPoint(&bulletTop, x+38,y+24);
+	setFirePoint(&bulletTop, x+35, y+18); //TAKE THE CENTER POINT, ALWAYS
+
+	initPolyline(&bulletBody, 255,255,255,0);
+	addEndPoint(&bulletBody, x+38, y+24);
+	addEndPoint(&bulletBody, x+30, y+18);
+	addEndPoint(&bulletBody, x+12, y+50);
+	addEndPoint(&bulletBody, x+20, y+54);
+	setFirePoint(&bulletBody, x+26, y+34); //IF THE CENTER POINT CAN'T BE EXACT, ESTIMATE IT
+
+	initPolyline(&bulletLeftWing, 255,255,0,0);
+	addEndPoint(&bulletLeftWing, x+0, y+51.5);
+	addEndPoint(&bulletLeftWing, x+8, y+56);
+	addEndPoint(&bulletLeftWing, x+19, y+37);
+	setFirePoint(&bulletLeftWing, x+8, y+50); //ALSO THIS
+
+	initPolyline(&bulletRightWing, 255,255,0,0);
+	addEndPoint(&bulletRightWing, x+29, y+41);
+	addEndPoint(&bulletRightWing, x+25, y+66);
+	addEndPoint(&bulletRightWing, x+17, y+61);
+	setFirePoint(&bulletRightWing, x+22, y+58); //ALSO THIS
+
+	//DRAW BODY FIRST IN ORDER TO MAKE TOP AND BOTTOM BORDER NOT CHANGED, AND COLORIZE AFTER DRAWING
+	drawPolylineOutline(&bulletBody);
+	fillPolyline(&bulletBody, 255,255,255,0);
+	drawPolylineOutline(&bulletTop);
+	fillPolyline(&bulletTop, 255,0,0,0);
+	drawPolylineOutline(&bulletLeftWing);
+	fillPolyline(&bulletLeftWing, 255,255,0,0);
+	drawPolylineOutline(&bulletRightWing);
+	fillPolyline(&bulletRightWing, 255,255,0,0);
+
+
+	}
+
+
 
 }
 
 void animateBullet(int dir) {
-	
+
 	// DRAW THE BULLET SHOOTING TO A DIRECTION FROM THE TURRET
 	// 0 = LEFT, 1 = MIDDLE, 2 = RIGHT
 	// TERMINATE ONCE THE BULLET DISAPEAR OR HIT THE PLANE
-	
+
 	// HIT COLLISION DETECTION ALSO HAPPEN HERE
 
 	int xbase = vinfo.xres/2, ybase = vinfo.yres -120;
@@ -980,25 +1089,25 @@ void animateBullet(int dir) {
 	initLine(&a, xbase, ybase, x, 0, 0, 0, 0, 0);
 	animateLine(&a, 0, 0);
 
-	
+
 	return;
 }
 
 void *ioHandler(void *null) {
-	
+
 	char ch;
 	while(1) {
-		
+
 		ch = getchar();
 		if (ch == '\n') {
-			
+
 			animateBullet(dir);
 			if(planeCrash==10) return;
-			
+
 		}
-		
+
 	}
-	
+
 }
 
 
@@ -1039,28 +1148,25 @@ void draw_circle(double cx, double cy, int radius)
 		}
 	}
 }
-
-
-
-// --------------------------------------------------------------------------------------------------------- //
+//LeftW--------------------------------------------------------------------------------------------------------- //
 
 int main() {
 
     initScreen();
     clearScreen();
-       
-	pthread_t planeThread, turretThread, ioThread;
-    pthread_create(&planeThread,NULL,startPlane,NULL);
-	pthread_create(&turretThread,NULL,turretHandler,NULL);
-	pthread_create(&ioThread,NULL,ioHandler,NULL);
+
+	//pthread_t planeThread, turretThread, ioThread;
+    //pthread_create(&planeThread,NULL,startPlane,NULL);
+	//pthread_create(&turretThread,NULL,turretHandler,NULL);
+	//pthread_create(&ioThread,NULL,ioHandler,NULL);
 
 	//draw_circle(500, 500, 20);
 	//floodFill(500, 500, 255,0,0,0,255,255,255,0);
-	drawBullet();
-	pthread_join(turretThread, NULL);
-	pthread_join(ioThread, NULL);
-    pthread_join(planeThread, NULL);
-    
+	drawBulletRight(400,300);
+	//pthread_join(turretThread, NULL);
+	//pthread_join(ioThread, NULL);
+    //pthread_join(planeThread, NULL);
+
     //terminate();
     return 0;
  }
