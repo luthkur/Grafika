@@ -829,7 +829,6 @@ void drawTurret(int dir) {
 			// draw
 			drawPolylineOutline(&turretLeftBody);
 			fillPolyline(&turretLeftBody, 255, 0, 0, 0);
-
 			usleep(500000);
 
 			// clear
@@ -838,8 +837,7 @@ void drawTurret(int dir) {
 		} else if (dir == 1) {
 
 			// initiate turret's body
-			initPolyline(&turretMiddleBody, 255, 255, 255, 0);
-
+			initPolyline(&turretMiddleBody, 244, 244, 244, 0);
 			// end point turret's body
 			addEndPoint(&turretMiddleBody, (vinfo.xres / 2) - 50, vinfo.yres - 200);
 			addEndPoint(&turretMiddleBody, (vinfo.xres / 2) + 50, vinfo.yres - 200);
@@ -859,7 +857,7 @@ void drawTurret(int dir) {
 
 			// draw
 			drawPolylineOutline(&turretMiddleBody);
-
+			fillPolyline(&turretMiddleBody, 130, 0, 0, 0);
 			usleep(500000);
 
 			// clear
@@ -868,8 +866,7 @@ void drawTurret(int dir) {
 		} else if (dir == 2) {
 
 			// initiate turret's body
-			initPolyline(&turretRightBody, 255, 255, 255, 0);
-
+			initPolyline(&turretRightBody, 244, 244, 244, 0);
 			// rotating around point (vinfo.xres / 2, vinfo.yres - 120)
 			centralPointX = vinfo.xres / 2;
 			centralPointY = vinfo.yres - 120;
@@ -885,7 +882,7 @@ void drawTurret(int dir) {
 
 			// draw
 			drawPolylineOutline(&turretRightBody);
-
+			fillPolyline(&turretRightBody, 130, 0, 0, 0);
 			usleep(500000);
 
 			// clear
@@ -897,14 +894,11 @@ void drawTurret(int dir) {
 }
 
 void *turretHandler(void *null) {
-
 	printf("turretHandler %d %d\n", planeCrash, dir);
-
 	while(planeCrash==0) {
 
 		drawTurret(dir);
 		dir++;
-		printf("%d\n", dir);
 		if(dir==3) dir = 0;
 
 	}
@@ -923,7 +917,6 @@ void drawBulletUp(int x, int y){
 	PolyLine bulletTop, bulletBody, bulletLeftWing, bulletRightWing;
 
 	while(1){
-
 	initPolyline(&bulletTop, 255,0,0,0);
 	addEndPoint(&bulletTop, x+14,y+0);
 	addEndPoint(&bulletTop, x+9,y+23);
@@ -1100,7 +1093,6 @@ void *ioHandler(void *null) {
 
 		ch = getchar();
 		if (ch == '\n') {
-
 			animateBullet(dir);
 			if(planeCrash==10) return;
 
@@ -1112,8 +1104,8 @@ void *ioHandler(void *null) {
 
 
 // --------------------------------------------------------------------------------------------------------- //
-void draw_circle(double cx, double cy, int radius)
-{
+
+void draw_circle(double cx, double cy, int radius) {
 	inline void plot4points(double cx, double cy, double x, double y)
 	{
 		plotPixelRGBA(cx + x, cy + y, 255, 255, 255, 0);
@@ -1148,25 +1140,25 @@ void draw_circle(double cx, double cy, int radius)
 		}
 	}
 }
-//LeftW--------------------------------------------------------------------------------------------------------- //
+
+//------//
 
 int main() {
 
     initScreen();
     clearScreen();
 
-	//pthread_t planeThread, turretThread, ioThread;
-    //pthread_create(&planeThread,NULL,startPlane,NULL);
-	//pthread_create(&turretThread,NULL,turretHandler,NULL);
-	//pthread_create(&ioThread,NULL,ioHandler,NULL);
+	pthread_t planeThread, turretThread, ioThread;
+  pthread_create(&planeThread,NULL,startPlane,NULL);
+	pthread_create(&turretThread,NULL,turretHandler,NULL);
+	pthread_create(&ioThread,NULL,ioHandler,NULL);
 
 	//draw_circle(500, 500, 20);
 	//floodFill(500, 500, 255,0,0,0,255,255,255,0);
 	drawBulletRight(400,300);
-	//pthread_join(turretThread, NULL);
-	//pthread_join(ioThread, NULL);
-    //pthread_join(planeThread, NULL);
-
-    //terminate();
+	pthread_join(turretThread, NULL);
+	pthread_join(ioThread, NULL);
+  pthread_join(planeThread, NULL);
+  terminate();
     return 0;
  }
