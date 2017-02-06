@@ -16,6 +16,8 @@ char *fbp = 0;                      // Framebuffer di memori internal
 
 int planeCrash = 0;					// 0 if the plane is still flying
 void *startPlane(void *);			// The thread that handle the plane
+int x_depan;
+int x_belakang;
 	
 int dir = 1;						// The current direction of the turret, 0 = LEFT, 1 = MIDDLE, 2 = RIGHT
 void *turretHandler(void *);		// The thread that handle the turret and its direction
@@ -728,6 +730,8 @@ void *startPlane(void *null) {
 			movePolyline(&plane3, -5, 0);
 			movePolyline(&plane4, -5, 0);
 			movePolyline(&plane5, -5, 0);
+			x_depan -= 5;
+			x_belakang -= 5;
 			nanosleep((const struct timespec[]){{0,100000000L}},NULL);
 		}
 		// NEED TO COLOR THE PLANE HERE
