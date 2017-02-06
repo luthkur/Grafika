@@ -8,6 +8,11 @@
 #include <time.h>
 #include <math.h>
 
+#define rplane 255
+#define gplane 20
+#define bplane 0
+#define aplane 0
+
 int fbfd = 0;                       // Filebuffer Filedescriptor
 struct fb_var_screeninfo vinfo;     // Struct Variable Screeninfo
 struct fb_fix_screeninfo finfo;     // Struct Fixed Screeninfo
@@ -86,7 +91,7 @@ void setCoordinate(Block *a , int _x , int _y){
 
 // PROSEDUR RESET LAYAR DAN PEWARNAAN PIXEL----------------------------------------------------------------- //
 
-void plotPixelRGBA(int _x, int _y, int r, int g, int b, int a) {
+int plotPixelRGBA(int _x, int _y, int r, int g, int b, int a) {
 	//Plot pixel (x,y) dengan warna (r,g,b,a)
 	if(!isOverflow(_x,_y)) {
 		long int location = (_x+vinfo.xoffset) * (vinfo.bits_per_pixel/8) + (_y+vinfo.yoffset) * finfo.line_length;
@@ -272,7 +277,8 @@ void initLine(Line* l, int xa, int ya, int xb, int yb, int rx, int gx, int bx, i
 	(*l).r = rx; (*l).g = gx; (*l).b = bx; (*l).a = ax;
 }
 
-void drawLine(Line* l) {
+int drawLine(Line* l) {
+	int col = 0;
 
 	// Coord. of the next point to be displayed
 	int x = (*l).x1;
@@ -301,6 +307,7 @@ void drawLine(Line* l) {
 
 			// Draw the next pixel
 			if (!isOverflow(x,y)) {
+				if (isPixelColor(x,y,rplane,gplane,bplane,aplane)) col = 1;
 				plotPixelRGBA(x,y,(*l).r,(*l).g,(*l).b,(*l).a);
 			}
 
@@ -334,6 +341,7 @@ void drawLine(Line* l) {
 
 			// Draw the next pixel
 			if (!isOverflow(x,y)) {
+				if (isPixelColor(x,y,rplane,gplane,bplane,aplane)) col = 1;
 				plotPixelRGBA(x,y,(*l).r,(*l).g,(*l).b,(*l).a);
 			}
 
@@ -350,7 +358,7 @@ void drawLine(Line* l) {
 		}
 
 	}
-
+	return col;
 }
 
 int animateLine(Line* l, int delay, int length) {
@@ -621,16 +629,17 @@ void addEndPoint(PolyLine* p, int _x, int _y) {
 // i = 3 - 2, 3
 // i = 4 - 3, 0
 
-void drawPolylineOutline(PolyLine* p) {
-
+int drawPolylineOutline(PolyLine* p) {
+	int col = 0;
 	int i; Line l;
 	for(i=1; i<(*p).PointCount; i++) {
 		initLine(&l, (*p).x[i-1], (*p).y[i-1], (*p).x[i], (*p).y[i] ,(*p).r, (*p).g, (*p).b, (*p).a);
-		drawLine(&l);
+		col |= drawLine(&l);
 	}
 
 	initLine(&l, (*p).x[i-1], (*p).y[i-1], (*p).x[0], (*p).y[0] ,(*p).r, (*p).g, (*p).b, (*p).a);
-	drawLine(&l);
+	col |= drawLine(&l);
+	return col;
 }
 
 void setFirePoint(PolyLine* p, int x, int y) {
@@ -691,7 +700,7 @@ void *startPlane(void *null) {
 
 		// Initiate the plane, should be offscreen to the right of the screen
 		// May be changed according to the screensize
-		initPolyline(&plane1, 255, 255, 0, 0);
+		initPolyline(&plane1, rplane, gplane, bplane, aplane);
 		addEndPoint(&plane1, 500, 200);
 		addEndPoint(&plane1, 400, 300);
 		addEndPoint(&plane1, 600, 300);
@@ -700,19 +709,19 @@ void *startPlane(void *null) {
 		addEndPoint(&plane1, 700, 200);
 		addEndPoint(&plane1, 600, 200);
 
-		initPolyline(&plane2, 255, 255, 0, 0);
+		initPolyline(&plane2, rplane, gplane, bplane, aplane);
 		addEndPoint(&plane2, 500, 300);
 		addEndPoint(&plane2, 700, 450);
 		addEndPoint(&plane2, 700, 300);
-		initPolyline(&plane3, 255, 255, 0, 0);
+		initPolyline(&plane3, rplane, gplane, bplane, aplane);
 		addEndPoint(&plane3, 500, 200);
 		addEndPoint(&plane3, 700, 50);
 		addEndPoint(&plane3, 700, 200);
-		initPolyline(&plane4, 255, 255, 0, 0);
+		initPolyline(&plane4, rplane, gplane, bplane, aplane);
 		addEndPoint(&plane4, 800, 300);
 		addEndPoint(&plane4, 900, 400);
 		addEndPoint(&plane4, 900, 300);
-		initPolyline(&plane5, 255, 255, 0, 0);
+		initPolyline(&plane5, rplane, gplane, bplane, aplane);
 		addEndPoint(&plane5, 800, 200);
 		addEndPoint(&plane5, 900, 100);
 		addEndPoint(&plane5, 900, 200);
@@ -909,20 +918,22 @@ void *turretHandler(void *null) {
 
 // METODE HANDLER THREAD PELURU----------------------------------------------------------------------------- //
 
-void drawBulletUp(int x, int y){
+int drawBulletUp(int x, int y, int clear){
 //NOTICE: IT IS STILL STATIC, THE DIRECTION IS UP
 //x : leftmost
 //y: topmost
 
 	PolyLine bulletTop, bulletBody, bulletLeftWing, bulletRightWing;
 
-	while(1){
+	
+	
 	initPolyline(&bulletTop, 255,0,0,0);
 	addEndPoint(&bulletTop, x+14,y+0);
 	addEndPoint(&bulletTop, x+9,y+23);
 	addEndPoint(&bulletTop, x+19,y+23);
 	setFirePoint(&bulletTop, x+14, y+15); //TAKE THE CENTER POINT, ALWAYS
 
+	
 	initPolyline(&bulletBody, 255,255,255,0);
 	addEndPoint(&bulletBody, x+19, y+23);
 	addEndPoint(&bulletBody, x+9, y+23);
@@ -930,12 +941,14 @@ void drawBulletUp(int x, int y){
 	addEndPoint(&bulletBody, x+19, y+59);
 	setFirePoint(&bulletBody, x+14, y+35); //IF THE CENTER POINT CAN'T BE EXACT, ESTIMATE IT
 
+	
 	initPolyline(&bulletLeftWing, 255,255,0,0);
 	addEndPoint(&bulletLeftWing, x+9, y+66);
 	addEndPoint(&bulletLeftWing, x, y+66);
 	addEndPoint(&bulletLeftWing, x+9, y+44);
 	setFirePoint(&bulletLeftWing, x+4, y+64); //ALSO THIS
 
+	
 	initPolyline(&bulletRightWing, 255,255,0,0);
 	addEndPoint(&bulletRightWing, x+19, y+66);
 	addEndPoint(&bulletRightWing, x+28, y+66);
@@ -943,30 +956,38 @@ void drawBulletUp(int x, int y){
 	setFirePoint(&bulletRightWing, x+25, y+64); //ALSO THIS
 
 	//DRAW BODY FIRST IN ORDER TO MAKE TOP AND BOTTOM BORDER NOT CHANGED, AND COLORIZE AFTER DRAWING
-	drawPolylineOutline(&bulletBody);
-	fillPolyline(&bulletBody, 255,255,255,0);
-	drawPolylineOutline(&bulletTop);
-	fillPolyline(&bulletTop, 255,0,0,0);
-	drawPolylineOutline(&bulletLeftWing);
-	fillPolyline(&bulletLeftWing, 255,255,0,0);
-	drawPolylineOutline(&bulletRightWing);
-	fillPolyline(&bulletRightWing, 255,255,0,0);
-
-
+	int col = 0;
+	if(clear) {
+		deletePolyline(&bulletRightWing);
+		deletePolyline(&bulletLeftWing);
+		deletePolyline(&bulletTop);
+		deletePolyline(&bulletBody);
 	}
+	else {
+		col |= drawPolylineOutline(&bulletBody);
+		fillPolyline(&bulletBody, 255,255,255,0);
+		col |= drawPolylineOutline(&bulletTop);
+		fillPolyline(&bulletTop, 255,0,0,0);
+		col |= drawPolylineOutline(&bulletLeftWing);
+		fillPolyline(&bulletLeftWing, 255,255,0,0);
+		col |= drawPolylineOutline(&bulletRightWing);
+		fillPolyline(&bulletRightWing, 255,255,0,0);
+	}
+
+	return col;
+
 
 
 
 }
 
-void drawBulletLeft(int x, int y){
+int drawBulletLeft(int x, int y, int clear){
 //NOTICE: IT IS STILL STATIC, THE DIRECTION IS LEFT 30 DEGREES
 //x : leftmost
 //y: topmost
 
 	PolyLine bulletTop, bulletBody, bulletLeftWing, bulletRightWing;
 
-	while(1){
 
 	initPolyline(&bulletTop, 255,0,0,0);
 	addEndPoint(&bulletTop, x,y);
@@ -994,30 +1015,44 @@ void drawBulletLeft(int x, int y){
 	setFirePoint(&bulletRightWing, x+38, y+50); //ALSO THIS
 
 	//DRAW BODY FIRST IN ORDER TO MAKE TOP AND BOTTOM BORDER NOT CHANGED, AND COLORIZE AFTER DRAWING
-	drawPolylineOutline(&bulletBody);
-	fillPolyline(&bulletBody, 255,255,255,0);
-	drawPolylineOutline(&bulletTop);
-	fillPolyline(&bulletTop, 255,0,0,0);
-	drawPolylineOutline(&bulletLeftWing);
-	fillPolyline(&bulletLeftWing, 255,255,0,0);
-	drawPolylineOutline(&bulletRightWing);
-	fillPolyline(&bulletRightWing, 255,255,0,0);
 
-
+	int col = 0;
+	if(clear) {
+		initPolyline(&bulletTop, 0,0,0,0);
+		initPolyline(&bulletBody, 0,0,0,0);
+		initPolyline(&bulletLeftWing, 0,0,0,0);
+		initPolyline(&bulletRightWing, 0,0,0,0);
+		drawPolylineOutline(&bulletBody);
+		fillPolyline(&bulletBody, 0,0,0,0);
+		drawPolylineOutline(&bulletTop);
+		fillPolyline(&bulletTop, 0,0,0,0);
+		drawPolylineOutline(&bulletLeftWing);
+		fillPolyline(&bulletLeftWing, 0,0,0,0);
+		drawPolylineOutline(&bulletRightWing);
+		fillPolyline(&bulletRightWing, 0,0,0,0);
+	}
+	else {
+		col |= drawPolylineOutline(&bulletBody);
+		fillPolyline(&bulletBody, 255,255,255,0);
+		col |= drawPolylineOutline(&bulletTop);
+		fillPolyline(&bulletTop, 255,0,0,0);
+		col |= drawPolylineOutline(&bulletLeftWing);
+		fillPolyline(&bulletLeftWing, 255,255,0,0);
+		col |= drawPolylineOutline(&bulletRightWing);
+		fillPolyline(&bulletRightWing, 255,255,0,0);
 	}
 
-
+	return col;
 
 }
 
-void drawBulletRight(int x, int y){
+int drawBulletRight(int x, int y, int clear){
 //NOTICE: IT IS STILL STATIC, THE DIRECTION IS RIGHT 30 DEGREES
 //x : leftmost
 //y: topmost
 
 	PolyLine bulletTop, bulletBody, bulletLeftWing, bulletRightWing;
 
-	while(1){
 
 	initPolyline(&bulletTop, 255,0,0,0);
 	addEndPoint(&bulletTop, x+47,y);
@@ -1045,17 +1080,35 @@ void drawBulletRight(int x, int y){
 	setFirePoint(&bulletRightWing, x+22, y+58); //ALSO THIS
 
 	//DRAW BODY FIRST IN ORDER TO MAKE TOP AND BOTTOM BORDER NOT CHANGED, AND COLORIZE AFTER DRAWING
-	drawPolylineOutline(&bulletBody);
-	fillPolyline(&bulletBody, 255,255,255,0);
-	drawPolylineOutline(&bulletTop);
-	fillPolyline(&bulletTop, 255,0,0,0);
-	drawPolylineOutline(&bulletLeftWing);
-	fillPolyline(&bulletLeftWing, 255,255,0,0);
-	drawPolylineOutline(&bulletRightWing);
-	fillPolyline(&bulletRightWing, 255,255,0,0);
-
-
+	int col = 0;
+	if(clear) {
+		initPolyline(&bulletTop, 0,0,0,0);
+		initPolyline(&bulletBody, 0,0,0,0);
+		initPolyline(&bulletLeftWing, 0,0,0,0);
+		initPolyline(&bulletRightWing, 0,0,0,0);
+		drawPolylineOutline(&bulletBody);
+		fillPolyline(&bulletBody, 0,0,0,0);
+		drawPolylineOutline(&bulletTop);
+		fillPolyline(&bulletTop, 0,0,0,0);
+		drawPolylineOutline(&bulletLeftWing);
+		fillPolyline(&bulletLeftWing, 0,0,0,0);
+		drawPolylineOutline(&bulletRightWing);
+		fillPolyline(&bulletRightWing, 0,0,0,0);
+	}	else {
+		col |= drawPolylineOutline(&bulletBody);
+		fillPolyline(&bulletBody, 255,255,255,0);
+		col |= drawPolylineOutline(&bulletTop);
+		fillPolyline(&bulletTop, 255,0,0,0);
+		col |= drawPolylineOutline(&bulletLeftWing);
+		fillPolyline(&bulletLeftWing, 255,255,0,0);
+		col |= drawPolylineOutline(&bulletRightWing);
+		fillPolyline(&bulletRightWing, 255,255,0,0);
 	}
+
+	return col;
+
+
+
 
 
 
@@ -1069,9 +1122,9 @@ void animateBullet(int dir) {
 
 	// HIT COLLISION DETECTION ALSO HAPPEN HERE
 
-	int xbase = vinfo.xres/2, ybase = vinfo.yres -120;
+	int xbase = vinfo.xres/2 - 15, ybase = vinfo.yres -380;
 
-	Line a;
+	/*Line a;
 	int x;
 	if (dir == 0) x = xbase - 0.5*xbase;
 	else if (dir == 1) x = xbase;
@@ -1080,8 +1133,154 @@ void animateBullet(int dir) {
 	int col = animateLine(&a, 100, 100);
 	if (col) printf("COLLISION\n");
 	initLine(&a, xbase, ybase, x, 0, 0, 0, 0, 0);
-	animateLine(&a, 0, 0);
+	animateLine(&a, 0, 0);*/
 
+	int col = 0;
+	int y;
+
+	if (dir == 1) {
+		for (y=ybase;y>-100;y--) {
+			col = drawBulletUp(xbase,y,0);
+			usleep(2000);
+			drawBulletUp(xbase,y,1);
+			if (col) {
+				planeCrash++;
+				return;
+			}
+		}
+	} else if (dir == 0) {
+		xbase -= 150;
+
+		// Coord. of the next point to be displayed
+		int x = xbase;
+		int y = ybase;
+
+		// Calculate initial error factor
+		int dx = abs(xbase);
+		int dy = abs(ybase+50);
+		int p = 0;
+
+		// If the absolute gradien is less than 1
+		if(dx >= dy) {
+
+			// Repeat printing the next pixel until the line is painted
+			while(y >= -50) {
+
+				// Draw the next pixel
+				col = drawBulletLeft(x,y,0);
+				usleep(2000);
+				drawBulletLeft(x,y,1);
+				if (col) {
+					planeCrash++;
+					return;
+				}
+				
+
+				// Calculate the next pixel
+				if(p < 0) {
+					p = p + 2*dy;
+				} else {
+					p = p + 2*(dy-dx);
+					
+					y--;
+				}
+				x--;
+
+			}
+
+		// If the absolute gradien is more than 1
+		} else {
+
+			// Repeat printing the next pixel until the line is painted
+			while(y >= -50) {
+
+				// Draw the next pixel
+				col = drawBulletLeft(xbase,y,0);
+				usleep(2000);
+				drawBulletLeft(xbase,y,1);
+				if (col) {
+					planeCrash++;
+					return;
+				}
+				
+				// Calculate the next pixel
+				if(p < 0) {
+					p = p + 2*dx;
+				} else {
+					p = p + 2*(dx-dy);
+					x--;
+				}
+				y--;
+			}
+
+		}
+	} else if (dir == 2) {
+		xbase += 150;
+
+		// Coord. of the next point to be displayed
+		int x = xbase;
+		int y = ybase;
+
+		// Calculate initial error factor
+		int dx = abs(xbase-vinfo.xres);
+		int dy = abs(ybase+50);
+		int p = 0;
+
+		// If the absolute gradien is less than 1
+		if(dx >= dy) {
+
+			// Repeat printing the next pixel until the line is painted
+			while(y >= -50) {
+
+				// Draw the next pixel
+				col = drawBulletRight(x,y,0);
+				usleep(2000);
+				drawBulletRight(x,y,1);
+				if (col) {
+					planeCrash++;
+					return;
+				}
+				
+
+				// Calculate the next pixel
+				if(p < 0) {
+					p = p + 2*dy;
+				} else {
+					p = p + 2*(dy-dx);
+					
+					y--;
+				}
+				x++;
+
+			}
+
+		// If the absolute gradien is more than 1
+		} else {
+
+			// Repeat printing the next pixel until the line is painted
+			while(y >= -50) {
+
+				// Draw the next pixel
+				col = drawBulletRight(xbase,y,0);
+				usleep(2000);
+				drawBulletRight(xbase,y,1);
+				if (col) {
+					planeCrash++;
+					return;
+				}
+				
+				// Calculate the next pixel
+				if(p < 0) {
+					p = p + 2*dx;
+				} else {
+					p = p + 2*(dx-dy);
+					x++;
+				}
+				y--;
+			}
+
+		}
+	}
 
 	return;
 }
@@ -1155,7 +1354,10 @@ int main() {
 
 	//draw_circle(500, 500, 20);
 	//floodFill(500, 500, 255,0,0,0,255,255,255,0);
-	drawBulletRight(400,300);
+	//drawBulletUp(400,300,0);
+	//usleep(1000000);
+	//drawBulletUp(400,300,1);
+
 	pthread_join(turretThread, NULL);
 	pthread_join(ioThread, NULL);
   pthread_join(planeThread, NULL);
