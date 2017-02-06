@@ -722,6 +722,14 @@ void *startPlane(void *null) {
 		drawPolylineOutline(&plane4);
 		drawPolylineOutline(&plane5);
 		
+		while (planeCrash==0){
+			movePolyline(&plane1, -5, 0);
+			movePolyline(&plane2, -5, 0);
+			movePolyline(&plane3, -5, 0);
+			movePolyline(&plane4, -5, 0);
+			movePolyline(&plane5, -5, 0);
+			nanosleep((const struct timespec[]){{0,100000000L}},NULL);
+		}
 		// NEED TO COLOR THE PLANE HERE
 		
 		// ITERATE MOVE PLANE LEFT AND SLEEP, IF PLANE NO LONGER VISIBLE, 
