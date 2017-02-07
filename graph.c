@@ -29,6 +29,11 @@ void *turretHandler(void *);		// The thread that handle the turret and its direc
 
 void *ioHandler(void *);			// The thread that handle the bullet shooting
 
+struct PlaneData{
+  int xpos;
+  int ypos;
+  int size;
+};
 
 // UTILITY PROCEDURE----------------------------------------------------------------------------------------- //
 
@@ -153,7 +158,6 @@ void clearScreen() {
 //Mewarnai latar belakang screen dengan warna putih
     int x = 0;
     int y = 0;
-    printf("wtf\n");
     for (y = 0; y < vinfo.yres - 150 ;y++) {
 		for (x = 0; x < vinfo.xres ; x++) {
 			if (vinfo.bits_per_pixel == 32) {
@@ -693,38 +697,43 @@ void movePolyline(PolyLine* p, int dx, int dy) {
 
 // METODE ANIMASI PESAWAT----------------------------------------------------------------------------------- //
 
-void *startPlane(void *null) {
-
+void *startPlane(void *threadarg) {
+  struct PlaneData *PlaneThreadData;
+  int xpos,ypos,size;
+  PlaneThreadData = (struct PlaneData *) threadarg;
+  xpos = PlaneThreadData -> xpos;
+  ypos = PlaneThreadData -> ypos;
+  size = PlaneThreadData -> size;
 	PolyLine plane1,plane2,plane3,plane4,plane5;
 	while(1) {
 
 		// Initiate the plane, should be offscreen to the right of the screen
 		// May be changed according to the screensize
 		initPolyline(&plane1, rplane, gplane, bplane, aplane);
-		addEndPoint(&plane1, 500, 200);
-		addEndPoint(&plane1, 400, 300);
-		addEndPoint(&plane1, 600, 300);
-		addEndPoint(&plane1, 900, 300);
-		addEndPoint(&plane1, 900, 100);
-		addEndPoint(&plane1, 700, 200);
-		addEndPoint(&plane1, 600, 200);
+		addEndPoint(&plane1, xpos-size*2, ypos-size);
+		addEndPoint(&plane1, xpos-size*4, ypos+size);
+		addEndPoint(&plane1, xpos, ypos+size);
+		addEndPoint(&plane1, xpos+size*6, ypos+size);
+		addEndPoint(&plane1, xpos+size*6, ypos-size);
+		addEndPoint(&plane1, xpos+size*2, ypos-size);
+		addEndPoint(&plane1, xpos, ypos-size);
 
 		initPolyline(&plane2, rplane, gplane, bplane, aplane);
-		addEndPoint(&plane2, 500, 300);
-		addEndPoint(&plane2, 700, 450);
-		addEndPoint(&plane2, 700, 300);
+		addEndPoint(&plane2, xpos-size*2, ypos+size);
+		addEndPoint(&plane2, xpos+size*2, ypos+size*4);
+		addEndPoint(&plane2, xpos+size*2, ypos+size);
 		initPolyline(&plane3, rplane, gplane, bplane, aplane);
-		addEndPoint(&plane3, 500, 200);
-		addEndPoint(&plane3, 700, 50);
-		addEndPoint(&plane3, 700, 200);
+		addEndPoint(&plane3, xpos-size*2, ypos-size);
+		addEndPoint(&plane3, xpos+size*2, ypos-size*4);
+		addEndPoint(&plane3, xpos+size*2, ypos-size);
 		initPolyline(&plane4, rplane, gplane, bplane, aplane);
-		addEndPoint(&plane4, 800, 300);
-		addEndPoint(&plane4, 900, 400);
-		addEndPoint(&plane4, 900, 300);
+		addEndPoint(&plane4, xpos+size*4, ypos+size);
+		addEndPoint(&plane4, xpos+size*6, ypos+size*4);
+		addEndPoint(&plane4, xpos+size*6, ypos+size);
 		initPolyline(&plane5, rplane, gplane, bplane, aplane);
-		addEndPoint(&plane5, 800, 200);
-		addEndPoint(&plane5, 900, 100);
-		addEndPoint(&plane5, 900, 200);
+		addEndPoint(&plane5, xpos+size*4, ypos-size);
+		addEndPoint(&plane5, xpos+size*6, ypos-size*4);
+		addEndPoint(&plane5, xpos+size*6, ypos-size);
 
 		drawPolylineOutline(&plane1);
 
@@ -925,15 +934,15 @@ int drawBulletUp(int x, int y, int clear){
 
 	PolyLine bulletTop, bulletBody, bulletLeftWing, bulletRightWing;
 
-	
-	
+
+
 	initPolyline(&bulletTop, 255,0,0,0);
 	addEndPoint(&bulletTop, x+14,y+0);
 	addEndPoint(&bulletTop, x+9,y+23);
 	addEndPoint(&bulletTop, x+19,y+23);
 	setFirePoint(&bulletTop, x+14, y+15); //TAKE THE CENTER POINT, ALWAYS
 
-	
+
 	initPolyline(&bulletBody, 255,255,255,0);
 	addEndPoint(&bulletBody, x+19, y+23);
 	addEndPoint(&bulletBody, x+9, y+23);
@@ -941,14 +950,14 @@ int drawBulletUp(int x, int y, int clear){
 	addEndPoint(&bulletBody, x+19, y+59);
 	setFirePoint(&bulletBody, x+14, y+35); //IF THE CENTER POINT CAN'T BE EXACT, ESTIMATE IT
 
-	
+
 	initPolyline(&bulletLeftWing, 255,255,0,0);
 	addEndPoint(&bulletLeftWing, x+9, y+66);
 	addEndPoint(&bulletLeftWing, x, y+66);
 	addEndPoint(&bulletLeftWing, x+9, y+44);
 	setFirePoint(&bulletLeftWing, x+4, y+64); //ALSO THIS
 
-	
+
 	initPolyline(&bulletRightWing, 255,255,0,0);
 	addEndPoint(&bulletRightWing, x+19, y+66);
 	addEndPoint(&bulletRightWing, x+28, y+66);
@@ -1174,14 +1183,14 @@ void animateBullet(int dir) {
 					planeCrash++;
 					return;
 				}
-				
+
 
 				// Calculate the next pixel
 				if(p < 0) {
 					p = p + 2*dy;
 				} else {
 					p = p + 2*(dy-dx);
-					
+
 					y--;
 				}
 				x--;
@@ -1202,7 +1211,7 @@ void animateBullet(int dir) {
 					planeCrash++;
 					return;
 				}
-				
+
 				// Calculate the next pixel
 				if(p < 0) {
 					p = p + 2*dx;
@@ -1240,14 +1249,14 @@ void animateBullet(int dir) {
 					planeCrash++;
 					return;
 				}
-				
+
 
 				// Calculate the next pixel
 				if(p < 0) {
 					p = p + 2*dy;
 				} else {
 					p = p + 2*(dy-dx);
-					
+
 					y--;
 				}
 				x++;
@@ -1268,7 +1277,7 @@ void animateBullet(int dir) {
 					planeCrash++;
 					return;
 				}
-				
+
 				// Calculate the next pixel
 				if(p < 0) {
 					p = p + 2*dx;
@@ -1340,15 +1349,23 @@ void draw_circle(double cx, double cy, int radius) {
 	}
 }
 
+
+
 //------//
 
-int main() {
-
+int main(int argc, char *argv[]) {
+  struct PlaneData AddPlaneData;
+  AddPlaneData.xpos = atoi(argv[1]);
+  AddPlaneData.ypos = atoi(argv[2]);
+  AddPlaneData.size = atoi(argv[3]);
+  printf("xposition : %d\n", AddPlaneData.xpos);
+  printf("yposition : %d\n", AddPlaneData.ypos);
+  printf("size constan : %d\n", AddPlaneData.size);
     initScreen();
     clearScreen();
 
 	pthread_t planeThread, turretThread, ioThread;
-  pthread_create(&planeThread,NULL,startPlane,NULL);
+  pthread_create(&planeThread,NULL,startPlane,(void *) &AddPlaneData);
 	pthread_create(&turretThread,NULL,turretHandler,NULL);
 	pthread_create(&ioThread,NULL,ioHandler,NULL);
 
