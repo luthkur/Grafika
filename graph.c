@@ -705,9 +705,11 @@ void *startPlane(void *threadarg) {
   ypos = PlaneThreadData -> ypos;
   size = PlaneThreadData -> size;
   PolyLine plane1,plane2,plane3,plane4,plane5;
+  int iii = 10;
 	while(1) {
 		x_depan = xpos-size*2;
 		x_belakang = xpos+size*6;
+
 	
 		// Initiate the plane, should be offscreen to the right of the screen
 		// May be changed according to the screensize
@@ -754,11 +756,18 @@ void *startPlane(void *threadarg) {
 				x_belakang -= 5;
 				nanosleep((const struct timespec[]){{0,100000000L}},NULL);
 		}
-		deletePolyline(&plane1);
-		deletePolyline(&plane2);
-		deletePolyline(&plane3);
-		deletePolyline(&plane4);
-		deletePolyline(&plane5);
+
+
+		
+		while (iii<1000){
+				movePolyline(&plane1, -50, iii);
+				movePolyline(&plane2, -40, iii);
+				movePolyline(&plane3, 30, iii);
+				movePolyline(&plane4, 50, iii);
+				movePolyline(&plane5, 20, iii);
+				nanosleep((const struct timespec[]){{0,100000000L}},NULL);
+				iii += 50;
+		}
 		// NEED TO COLOR THE PLANE HERE
 
 		// ITERATE MOVE PLANE LEFT AND SLEEP, IF PLANE NO LONGER VISIBLE,
