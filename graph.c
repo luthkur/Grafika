@@ -775,10 +775,15 @@ void *startPlane(void *threadarg) {
 
     while (iii<1000){
         movePolyline(&plane1, -50, iii);
+        fillPolyline(&plane1, 100,200,200,0);
         movePolyline(&plane2, -40, iii);
+        fillPolyline(&plane2, 100,200,200,0);
         movePolyline(&plane3, 30, iii);
+        fillPolyline(&plane3, 100,200,200,0);
         movePolyline(&plane4, 50, iii);
+        fillPolyline(&plane4, 100,200,200,0);
         movePolyline(&plane5, 20, iii);
+        fillPolyline(&plane5, 100,200,200,0);
         nanosleep((const struct timespec[]){{0,100000000L}},NULL);
         iii += 50;
     }
