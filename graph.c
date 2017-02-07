@@ -704,9 +704,11 @@ void *startPlane(void *threadarg) {
   xpos = PlaneThreadData -> xpos;
   ypos = PlaneThreadData -> ypos;
   size = PlaneThreadData -> size;
-	PolyLine plane1,plane2,plane3,plane4,plane5;
+  PolyLine plane1,plane2,plane3,plane4,plane5;
 	while(1) {
-
+		x_depan = xpos-size*2;
+		x_belakang = xpos+size*6;
+	
 		// Initiate the plane, should be offscreen to the right of the screen
 		// May be changed according to the screensize
 		initPolyline(&plane1, rplane, gplane, bplane, aplane);
@@ -742,16 +744,21 @@ void *startPlane(void *threadarg) {
 		drawPolylineOutline(&plane4);
 		drawPolylineOutline(&plane5);
 
-		while (planeCrash==0){
-			movePolyline(&plane1, -5, 0);
-			movePolyline(&plane2, -5, 0);
-			movePolyline(&plane3, -5, 0);
-			movePolyline(&plane4, -5, 0);
-			movePolyline(&plane5, -5, 0);
-			x_depan -= 5;
-			x_belakang -= 5;
-			nanosleep((const struct timespec[]){{0,100000000L}},NULL);
+		while (planeCrash==0 && x_belakang>0){
+				movePolyline(&plane1, -5, 0);
+				movePolyline(&plane2, -5, 0);
+				movePolyline(&plane3, -5, 0);
+				movePolyline(&plane4, -5, 0);
+				movePolyline(&plane5, -5, 0);
+				x_depan -= 5;
+				x_belakang -= 5;
+				nanosleep((const struct timespec[]){{0,100000000L}},NULL);
 		}
+		deletePolyline(&plane1);
+		deletePolyline(&plane2);
+		deletePolyline(&plane3);
+		deletePolyline(&plane4);
+		deletePolyline(&plane5);
 		// NEED TO COLOR THE PLANE HERE
 
 		// ITERATE MOVE PLANE LEFT AND SLEEP, IF PLANE NO LONGER VISIBLE,
