@@ -311,7 +311,14 @@ int drawLine(Line* l) {
 
 			// Draw the next pixel
 			if (!isOverflow(x,y)) {
-				if (isPixelColor(x,y,rplane,gplane,bplane,aplane)) col = 1;
+				if (isPixelColor(x+1,y+1,rplane,gplane,bplane,aplane)) col = 1;
+				if (isPixelColor(x+1,y,rplane,gplane,bplane,aplane)) col = 1;
+				if (isPixelColor(x+1,y-1,rplane,gplane,bplane,aplane)) col = 1;
+				if (isPixelColor(x,y-1,rplane,gplane,bplane,aplane)) col = 1;
+				if (isPixelColor(x-1,y-1,rplane,gplane,bplane,aplane)) col = 1;
+				if (isPixelColor(x-1,y,rplane,gplane,bplane,aplane)) col = 1;
+				if (isPixelColor(x-1,y+1,rplane,gplane,bplane,aplane)) col = 1;
+				if (isPixelColor(x,y+1,rplane,gplane,bplane,aplane)) col = 1;
 				plotPixelRGBA(x,y,(*l).r,(*l).g,(*l).b,(*l).a);
 			}
 
@@ -345,7 +352,14 @@ int drawLine(Line* l) {
 
 			// Draw the next pixel
 			if (!isOverflow(x,y)) {
-				if (isPixelColor(x,y,rplane,gplane,bplane,aplane)) col = 1;
+				if (isPixelColor(x+1,y+1,rplane,gplane,bplane,aplane)) col = 1;
+				if (isPixelColor(x+1,y,rplane,gplane,bplane,aplane)) col = 1;
+				if (isPixelColor(x+1,y-1,rplane,gplane,bplane,aplane)) col = 1;
+				if (isPixelColor(x,y-1,rplane,gplane,bplane,aplane)) col = 1;
+				if (isPixelColor(x-1,y-1,rplane,gplane,bplane,aplane)) col = 1;
+				if (isPixelColor(x-1,y,rplane,gplane,bplane,aplane)) col = 1;
+				if (isPixelColor(x-1,y+1,rplane,gplane,bplane,aplane)) col = 1;
+				if (isPixelColor(x,y+1,rplane,gplane,bplane,aplane)) col = 1;
 				plotPixelRGBA(x,y,(*l).r,(*l).g,(*l).b,(*l).a);
 			}
 
@@ -704,7 +718,7 @@ void *startPlane(void *threadarg) {
   size = PlaneThreadData -> size;
   PolyLine plane1,plane2,plane3,plane4,plane5;
   int iii = 10;
-	while(1) {
+	//while(1) {
 		x_depan = xpos-size*2;
 		x_belakang = xpos+size*6;
 
@@ -744,17 +758,18 @@ void *startPlane(void *threadarg) {
 
     while (planeCrash==0 && x_belakang>0){
         movePolyline(&plane1, -5, 0);
-        fillPolyline(&plane1, 100,200,200,0);
+        if (!planeCrash) fillPolyline(&plane1, 100,200,200,0);
         movePolyline(&plane2, -5, 0);
-        fillPolyline(&plane2, 100,200,200,0);
+        if (!planeCrash) fillPolyline(&plane2, 100,200,200,0);
         movePolyline(&plane3, -5, 0);
-        fillPolyline(&plane3, 100,200,200,0);
+        if (!planeCrash) fillPolyline(&plane3, 100,200,200,0);
         movePolyline(&plane4, -5, 0);
-        fillPolyline(&plane4, 100,200,200,0);
+        if (!planeCrash) fillPolyline(&plane4, 100,200,200,0);
         movePolyline(&plane5, -5, 0);
-        fillPolyline(&plane5, 100,200,200,0);
+        if (!planeCrash) fillPolyline(&plane5, 100,200,200,0);
         x_depan -= 5;
         x_belakang -= 5;
+        usleep(50005);
     }
 
 
@@ -775,7 +790,7 @@ void *startPlane(void *threadarg) {
 		// DURING EACH LOOP CHECK THE VALUE OF planeCrash VARIABLE
 		// IF ==1, EXIT THE LOOP INTO THE CRASH ANIMATION
 
-	}
+	//}
 
 	// ANIMATE THE CRASH FOR EACH POLYLINE 1-5 HERE
 
@@ -928,7 +943,6 @@ void drawTurret(int dir) {
 }
 
 void *turretHandler(void *null) {
-	printf("turretHandler %d %d\n", planeCrash, dir);
 	while(planeCrash==0) {
 
 		drawTurret(dir);
@@ -1318,7 +1332,7 @@ void *ioHandler(void *null) {
 		ch = getchar();
 		if (ch == '\n') {
 			animateBullet(dir);
-			if(planeCrash==10) return;
+			if(planeCrash) return;
 
 		}
 
@@ -1385,11 +1399,6 @@ int main(int argc, char *argv[]) {
 	pthread_create(&turretThread,NULL,turretHandler,NULL);
 	pthread_create(&ioThread,NULL,ioHandler,NULL);
 
-	//draw_circle(500, 500, 20);
-	//floodFill(500, 500, 255,0,0,0,255,255,255,0);
-	//drawBulletUp(400,300,0);
-	//usleep(1000000);
-	//drawBulletUp(400,300,1);
 
 	pthread_join(turretThread, NULL);
 	pthread_join(ioThread, NULL);
