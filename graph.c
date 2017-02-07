@@ -660,7 +660,7 @@ void fillPolyline(PolyLine* p, int rx, int gx, int bx, int ax) {
 
 void deletePolyline(PolyLine* p) {
 
-	fillPolyline(p, 0,0,0,0);
+  fillPolyline(p, 0,0,0,0);
 	int r = (*p).r;
 	int g = (*p).g;
 	int b = (*p).b;
@@ -674,7 +674,6 @@ void deletePolyline(PolyLine* p) {
 	(*p).g = g;
 	(*p).b = b;
 	(*p).a = a;
-
 }
 
 // Warning, will remove fill color and only redraw outline
@@ -690,7 +689,6 @@ void movePolyline(PolyLine* p, int dx, int dy) {
 		(*p).x[i] += dx;
 		(*p).y[i] += dy;
 	}
-
 	drawPolylineOutline(p);
 }
 
@@ -710,64 +708,66 @@ void *startPlane(void *threadarg) {
 		x_depan = xpos-size*2;
 		x_belakang = xpos+size*6;
 
-	
+
 		// Initiate the plane, should be offscreen to the right of the screen
 		// May be changed according to the screensize
 		initPolyline(&plane1, rplane, gplane, bplane, aplane);
 		addEndPoint(&plane1, xpos-size*2, ypos-size);
 		addEndPoint(&plane1, xpos-size*4, ypos+size);
-		addEndPoint(&plane1, xpos, ypos+size);
 		addEndPoint(&plane1, xpos+size*6, ypos+size);
 		addEndPoint(&plane1, xpos+size*6, ypos-size);
-		addEndPoint(&plane1, xpos+size*2, ypos-size);
-		addEndPoint(&plane1, xpos, ypos-size);
+    setFirePoint(&plane1, xpos, ypos);
 
 		initPolyline(&plane2, rplane, gplane, bplane, aplane);
 		addEndPoint(&plane2, xpos-size*2, ypos+size);
 		addEndPoint(&plane2, xpos+size*2, ypos+size*4);
 		addEndPoint(&plane2, xpos+size*2, ypos+size);
-		initPolyline(&plane3, rplane, gplane, bplane, aplane);
+    setFirePoint(&plane2, xpos, ypos+size*2);
+
+    initPolyline(&plane3, rplane, gplane, bplane, aplane);
 		addEndPoint(&plane3, xpos-size*2, ypos-size);
 		addEndPoint(&plane3, xpos+size*2, ypos-size*4);
 		addEndPoint(&plane3, xpos+size*2, ypos-size);
-		initPolyline(&plane4, rplane, gplane, bplane, aplane);
+    setFirePoint(&plane3, xpos, ypos-size*2);
+
+    initPolyline(&plane4, rplane, gplane, bplane, aplane);
 		addEndPoint(&plane4, xpos+size*4, ypos+size);
 		addEndPoint(&plane4, xpos+size*6, ypos+size*4);
 		addEndPoint(&plane4, xpos+size*6, ypos+size);
-		initPolyline(&plane5, rplane, gplane, bplane, aplane);
+    setFirePoint(&plane4, xpos+size*5, ypos+size*2);
+
+    initPolyline(&plane5, rplane, gplane, bplane, aplane);
 		addEndPoint(&plane5, xpos+size*4, ypos-size);
 		addEndPoint(&plane5, xpos+size*6, ypos-size*4);
 		addEndPoint(&plane5, xpos+size*6, ypos-size);
+    setFirePoint(&plane5, xpos+size*5, ypos-size*2);
 
-		drawPolylineOutline(&plane1);
-
-		drawPolylineOutline(&plane2);
-		drawPolylineOutline(&plane3);
-		drawPolylineOutline(&plane4);
-		drawPolylineOutline(&plane5);
-
-		while (planeCrash==0 && x_belakang>0){
-				movePolyline(&plane1, -5, 0);
-				movePolyline(&plane2, -5, 0);
-				movePolyline(&plane3, -5, 0);
-				movePolyline(&plane4, -5, 0);
-				movePolyline(&plane5, -5, 0);
-				x_depan -= 5;
-				x_belakang -= 5;
-				nanosleep((const struct timespec[]){{0,100000000L}},NULL);
-		}
+    while (planeCrash==0 && x_belakang>0){
+        movePolyline(&plane1, -5, 0);
+        fillPolyline(&plane1, 100,200,200,0);
+        movePolyline(&plane2, -5, 0);
+        fillPolyline(&plane2, 100,200,200,0);
+        movePolyline(&plane3, -5, 0);
+        fillPolyline(&plane3, 100,200,200,0);
+        movePolyline(&plane4, -5, 0);
+        fillPolyline(&plane4, 100,200,200,0);
+        movePolyline(&plane5, -5, 0);
+        fillPolyline(&plane5, 100,200,200,0);
+        x_depan -= 5;
+        x_belakang -= 5;
+    }
 
 
-		
-		while (iii<1000){
-				movePolyline(&plane1, -50, iii);
-				movePolyline(&plane2, -40, iii);
-				movePolyline(&plane3, 30, iii);
-				movePolyline(&plane4, 50, iii);
-				movePolyline(&plane5, 20, iii);
-				nanosleep((const struct timespec[]){{0,100000000L}},NULL);
-				iii += 50;
-		}
+    while (iii<1000){
+        movePolyline(&plane1, -50, iii);
+        movePolyline(&plane2, -40, iii);
+        movePolyline(&plane3, 30, iii);
+        movePolyline(&plane4, 50, iii);
+        movePolyline(&plane5, 20, iii);
+        nanosleep((const struct timespec[]){{0,100000000L}},NULL);
+        iii += 50;
+    }
+
 		// NEED TO COLOR THE PLANE HERE
 
 		// ITERATE MOVE PLANE LEFT AND SLEEP, IF PLANE NO LONGER VISIBLE,
