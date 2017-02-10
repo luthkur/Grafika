@@ -29,11 +29,6 @@ void *turretHandler(void *);		// The thread that handle the turret and its direc
 
 void *ioHandler(void *);			// The thread that handle the bullet shooting
 
-struct PlaneData{
-  int xpos;
-  int ypos;
-  int size;
-};
 
 // UTILITY PROCEDURE----------------------------------------------------------------------------------------- //
 
@@ -706,10 +701,41 @@ void movePolyline(PolyLine* p, int dx, int dy) {
 	drawPolylineOutline(p);
 }
 
+void rotatePolyline(PolyLine* p, int xr, int yr, double degrees) {
+	
+	deletePolyline(p);
+	double cosr = cos(degrees);
+	double sinr = sin(degrees);
+	double tempx;
+	double tempy;
+	
+	tempx = xr + (((*p).xp - xr) * cosr) - (((*p).yp - yr) * sinr);
+	tempy = yr + (((*p).xp - xr) * sinr) + (((*p).yp - yr) * cosr);
+	(*p).xp = round(tempx);
+	(*p).yp = round(tempy);
+	
+	int i;
+	for(i=0; i<(*p).PointCount; i++) {
+		tempx = xr + (((*p).x[i] - xr) * cosr) - (((*p).y[i] - yr) * sinr);
+		tempy = yr + (((*p).x[i] - xr) * sinr) + (((*p).y[i] - yr) * cosr);
+		(*p).x[i] = round(tempx);
+		(*p).y[i] = round(tempy);
+	}
+	
+	drawPolylineOutline(p);
+}
+
 
 // METODE ANIMASI PESAWAT----------------------------------------------------------------------------------- //
 
+struct PlaneData{
+  int xpos;
+  int ypos;
+  int size;
+};
+
 void *startPlane(void *threadarg) {
+	
   struct PlaneData *PlaneThreadData;
   int xpos,ypos,size;
   PlaneThreadData = (struct PlaneData *) threadarg;
@@ -718,43 +744,42 @@ void *startPlane(void *threadarg) {
   size = PlaneThreadData -> size;
   PolyLine plane1,plane2,plane3,plane4,plane5;
   int iii = 10;
-	//while(1) {
-		x_depan = xpos-size*2;
-		x_belakang = xpos+size*6;
+  
+	x_depan = xpos-size*2;
+	x_belakang = xpos+size*6;
 
+	// Initiate the plane, should be offscreen to the right of the screen
+	// May be changed according to the screensize
+	initPolyline(&plane1, rplane, gplane, bplane, aplane);
+	addEndPoint(&plane1, xpos-size*2, ypos-size);
+	addEndPoint(&plane1, xpos-size*4, ypos+size);
+	addEndPoint(&plane1, xpos+size*6, ypos+size);
+	addEndPoint(&plane1, xpos+size*6, ypos-size);
+	setFirePoint(&plane1, xpos, ypos);
 
-		// Initiate the plane, should be offscreen to the right of the screen
-		// May be changed according to the screensize
-		initPolyline(&plane1, rplane, gplane, bplane, aplane);
-		addEndPoint(&plane1, xpos-size*2, ypos-size);
-		addEndPoint(&plane1, xpos-size*4, ypos+size);
-		addEndPoint(&plane1, xpos+size*6, ypos+size);
-		addEndPoint(&plane1, xpos+size*6, ypos-size);
-    setFirePoint(&plane1, xpos, ypos);
+	initPolyline(&plane2, rplane, gplane, bplane, aplane);
+	addEndPoint(&plane2, xpos-size*2, ypos+size);
+	addEndPoint(&plane2, xpos+size*2, ypos+size*4);
+	addEndPoint(&plane2, xpos+size*2, ypos+size);
+	setFirePoint(&plane2, xpos, ypos+size*2);
 
-		initPolyline(&plane2, rplane, gplane, bplane, aplane);
-		addEndPoint(&plane2, xpos-size*2, ypos+size);
-		addEndPoint(&plane2, xpos+size*2, ypos+size*4);
-		addEndPoint(&plane2, xpos+size*2, ypos+size);
-    setFirePoint(&plane2, xpos, ypos+size*2);
+	initPolyline(&plane3, rplane, gplane, bplane, aplane);
+	addEndPoint(&plane3, xpos-size*2, ypos-size);
+	addEndPoint(&plane3, xpos+size*2, ypos-size*4);
+	addEndPoint(&plane3, xpos+size*2, ypos-size);
+	setFirePoint(&plane3, xpos, ypos-size*2);
 
-    initPolyline(&plane3, rplane, gplane, bplane, aplane);
-		addEndPoint(&plane3, xpos-size*2, ypos-size);
-		addEndPoint(&plane3, xpos+size*2, ypos-size*4);
-		addEndPoint(&plane3, xpos+size*2, ypos-size);
-    setFirePoint(&plane3, xpos, ypos-size*2);
+	initPolyline(&plane4, rplane, gplane, bplane, aplane);
+	addEndPoint(&plane4, xpos+size*4, ypos+size);
+	addEndPoint(&plane4, xpos+size*6, ypos+size*4);
+	addEndPoint(&plane4, xpos+size*6, ypos+size);
+	setFirePoint(&plane4, xpos+size*5, ypos+size*2);
 
-    initPolyline(&plane4, rplane, gplane, bplane, aplane);
-		addEndPoint(&plane4, xpos+size*4, ypos+size);
-		addEndPoint(&plane4, xpos+size*6, ypos+size*4);
-		addEndPoint(&plane4, xpos+size*6, ypos+size);
-    setFirePoint(&plane4, xpos+size*5, ypos+size*2);
-
-    initPolyline(&plane5, rplane, gplane, bplane, aplane);
-		addEndPoint(&plane5, xpos+size*4, ypos-size);
-		addEndPoint(&plane5, xpos+size*6, ypos-size*4);
-		addEndPoint(&plane5, xpos+size*6, ypos-size);
-    setFirePoint(&plane5, xpos+size*5, ypos-size*2);
+	initPolyline(&plane5, rplane, gplane, bplane, aplane);
+	addEndPoint(&plane5, xpos+size*4, ypos-size);
+	addEndPoint(&plane5, xpos+size*6, ypos-size*4);
+	addEndPoint(&plane5, xpos+size*6, ypos-size);
+	setFirePoint(&plane5, xpos+size*5, ypos-size*2);
 
     while (planeCrash==0 && x_belakang>0){
         movePolyline(&plane1, -5, 0);
@@ -788,17 +813,6 @@ void *startPlane(void *threadarg) {
         iii += 50;
     }
 
-		// NEED TO COLOR THE PLANE HERE
-
-		// ITERATE MOVE PLANE LEFT AND SLEEP, IF PLANE NO LONGER VISIBLE,
-		// RESET THE PLANE (EXIT LOOP)
-		// DURING EACH LOOP CHECK THE VALUE OF planeCrash VARIABLE
-		// IF ==1, EXIT THE LOOP INTO THE CRASH ANIMATION
-
-	//}
-
-	// ANIMATE THE CRASH FOR EACH POLYLINE 1-5 HERE
-
 	return;
 }
 
@@ -809,8 +823,6 @@ void drawTurret(int dir) {
 
 	// DRAW THE TURRET WITH THE APPROPRIATE DIRECTION ACCORDING TO dir PARAMETER
 	// 0 = LEFT, 1 = MIDDLE, 2 = RIGHT
-
-	// THE END POINT COORDINATE DEPENDS ON YOUR SCREEN'S WIDTH AND HEIGHT
 
 	/**
 	 * STEPS:
@@ -948,6 +960,7 @@ void drawTurret(int dir) {
 }
 
 void *turretHandler(void *null) {
+	
 	while(planeCrash==0) {
 
 		drawTurret(dir);
@@ -969,14 +982,11 @@ int drawBulletUp(int x, int y, int clear){
 
 	PolyLine bulletTop, bulletBody, bulletLeftWing, bulletRightWing;
 
-
-
 	initPolyline(&bulletTop, 255,0,0,0);
 	addEndPoint(&bulletTop, x+14,y+0);
 	addEndPoint(&bulletTop, x+9,y+23);
 	addEndPoint(&bulletTop, x+19,y+23);
 	setFirePoint(&bulletTop, x+14, y+15); //TAKE THE CENTER POINT, ALWAYS
-
 
 	initPolyline(&bulletBody, 255,255,255,0);
 	addEndPoint(&bulletBody, x+19, y+23);
@@ -985,13 +995,11 @@ int drawBulletUp(int x, int y, int clear){
 	addEndPoint(&bulletBody, x+19, y+59);
 	setFirePoint(&bulletBody, x+14, y+35); //IF THE CENTER POINT CAN'T BE EXACT, ESTIMATE IT
 
-
 	initPolyline(&bulletLeftWing, 255,255,0,0);
 	addEndPoint(&bulletLeftWing, x+9, y+66);
 	addEndPoint(&bulletLeftWing, x, y+66);
 	addEndPoint(&bulletLeftWing, x+9, y+44);
 	setFirePoint(&bulletLeftWing, x+4, y+64); //ALSO THIS
-
 
 	initPolyline(&bulletRightWing, 255,255,0,0);
 	addEndPoint(&bulletRightWing, x+19, y+66);
@@ -1019,10 +1027,7 @@ int drawBulletUp(int x, int y, int clear){
 	}
 
 	return col;
-
-
-
-
+	
 }
 
 int drawBulletLeft(int x, int y, int clear){
@@ -1031,7 +1036,6 @@ int drawBulletLeft(int x, int y, int clear){
 //y: topmost
 
 	PolyLine bulletTop, bulletBody, bulletLeftWing, bulletRightWing;
-
 
 	initPolyline(&bulletTop, 255,0,0,0);
 	addEndPoint(&bulletTop, x,y);
@@ -1097,7 +1101,6 @@ int drawBulletRight(int x, int y, int clear){
 
 	PolyLine bulletTop, bulletBody, bulletLeftWing, bulletRightWing;
 
-
 	initPolyline(&bulletTop, 255,0,0,0);
 	addEndPoint(&bulletTop, x+47,y);
 	addEndPoint(&bulletTop, x+30,y+18);
@@ -1150,12 +1153,7 @@ int drawBulletRight(int x, int y, int clear){
 	}
 
 	return col;
-
-
-
-
-
-
+	
 }
 
 void animateBullet(int dir) {
@@ -1389,25 +1387,47 @@ void draw_circle(double cx, double cy, int radius) {
 //------//
 
 int main(int argc, char *argv[]) {
-  struct PlaneData AddPlaneData;
-  AddPlaneData.xpos = atoi(argv[1]);
-  AddPlaneData.ypos = atoi(argv[2]);
-  AddPlaneData.size = atoi(argv[3]);
-  printf("xposition : %d\n", AddPlaneData.xpos);
-  printf("yposition : %d\n", AddPlaneData.ypos);
-  printf("size constan : %d\n", AddPlaneData.size);
+/*
+	struct PlaneData AddPlaneData;
+	AddPlaneData.xpos = atoi(argv[1]);
+	AddPlaneData.ypos = atoi(argv[2]);
+	AddPlaneData.size = atoi(argv[3]);
+	printf("xposition : %d\n", AddPlaneData.xpos);
+	printf("yposition : %d\n", AddPlaneData.ypos);
+	printf("size constan : %d\n", AddPlaneData.size);
+	
     initScreen();
     clearScreen();
 
 	pthread_t planeThread, turretThread, ioThread;
-  pthread_create(&planeThread,NULL,startPlane,(void *) &AddPlaneData);
+	pthread_create(&planeThread,NULL,startPlane,(void *) &AddPlaneData);
 	pthread_create(&turretThread,NULL,turretHandler,NULL);
 	pthread_create(&ioThread,NULL,ioHandler,NULL);
 
-
 	pthread_join(turretThread, NULL);
 	pthread_join(ioThread, NULL);
-  pthread_join(planeThread, NULL);
-  terminate();
+	pthread_join(planeThread, NULL);
+	terminate();
+  */
+    initScreen();
+    clearScreen();
+    
+	PolyLine p;
+	initPolyline(&p, 255,0,0,0);
+	addEndPoint(&p, 200,150);
+	addEndPoint(&p, 150,200);
+	addEndPoint(&p, 150,150);
+	
+	setFirePoint(&p, 160, 160);
+	drawPolylineOutline(&p);
+	fillPolyline(&p, 0,255,0,0);
+	
+	int i;
+	for(i=0; i<4; i++) {
+		usleep(500000);
+		rotatePolyline(&p,150,150,90);
+	}	
+	terminate();
     return 0;
  }
+
