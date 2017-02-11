@@ -689,14 +689,20 @@ void deletePolyline(PolyLine* p) {
 void movePolyline(PolyLine* p, int dx, int dy) {
 
 	deletePolyline(p);
-
-	(*p).xp += dx;
-	(*p).yp += dy;
+	int tempx;
+	int tempy;
+	
+	tempx = (*p).xp + dx;
+	tempy = (*p).yp + dy;
+	(*p).xp = tempx;
+	(*p).yp = tempy;
 
 	int i;
 	for(i=0; i<(*p).PointCount; i++) {
-		(*p).x[i] += dx;
-		(*p).y[i] += dy;
+		tempx = (*p).x[i] + dx;
+		tempy = (*p).y[i] + dy;
+		(*p).x[i] = tempx;
+		(*p).y[i] = tempy;
 	}
 	drawPolylineOutline(p);
 }
@@ -704,8 +710,8 @@ void movePolyline(PolyLine* p, int dx, int dy) {
 void rotatePolyline(PolyLine* p, int xr, int yr, double degrees) {
 	
 	deletePolyline(p);
-	double cosr = cos(degrees);
-	double sinr = sin(degrees);
+	double cosr = cos((22*degrees)/(180*7));
+	double sinr = sin((22*degrees)/(180*7));
 	double tempx;
 	double tempy;
 	
@@ -1415,17 +1421,20 @@ int main(int argc, char *argv[]) {
 	PolyLine p;
 	initPolyline(&p, 255,0,0,0);
 	addEndPoint(&p, 200,150);
+	addEndPoint(&p, 200,200);
 	addEndPoint(&p, 150,200);
 	addEndPoint(&p, 150,150);
 	
-	setFirePoint(&p, 160, 160);
+	setFirePoint(&p, 175, 175);
 	drawPolylineOutline(&p);
 	fillPolyline(&p, 0,255,0,0);
 	
 	int i;
-	for(i=0; i<4; i++) {
-		usleep(500000);
-		rotatePolyline(&p,150,150,90);
+	for(i=0; i<50; i++) {
+		usleep(100000);
+		rotatePolyline(&p,p.xp,p.yp,10);
+		movePolyline(&p,10,0);
+		fillPolyline(&p, 0,255,0,0);
 	}	
 	terminate();
     return 0;
