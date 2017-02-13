@@ -691,7 +691,7 @@ void movePolyline(PolyLine* p, int dx, int dy) {
 	deletePolyline(p);
 	int tempx;
 	int tempy;
-	
+
 	tempx = (*p).xp + dx;
 	tempy = (*p).yp + dy;
 	(*p).xp = tempx;
@@ -708,18 +708,18 @@ void movePolyline(PolyLine* p, int dx, int dy) {
 }
 
 void rotatePolyline(PolyLine* p, int xr, int yr, double degrees) {
-	
+
 	deletePolyline(p);
 	double cosr = cos((22*degrees)/(180*7));
 	double sinr = sin((22*degrees)/(180*7));
 	double tempx;
 	double tempy;
-	
+
 	tempx = xr + (((*p).xp - xr) * cosr) - (((*p).yp - yr) * sinr);
 	tempy = yr + (((*p).xp - xr) * sinr) + (((*p).yp - yr) * cosr);
 	(*p).xp = round(tempx);
 	(*p).yp = round(tempy);
-	
+
 	int i;
 	for(i=0; i<(*p).PointCount; i++) {
 		tempx = xr + (((*p).x[i] - xr) * cosr) - (((*p).y[i] - yr) * sinr);
@@ -727,7 +727,7 @@ void rotatePolyline(PolyLine* p, int xr, int yr, double degrees) {
 		(*p).x[i] = round(tempx);
 		(*p).y[i] = round(tempy);
 	}
-	
+
 	drawPolylineOutline(p);
 }
 
@@ -741,7 +741,7 @@ struct PlaneData{
 };
 
 void *startPlane(void *threadarg) {
-	
+
   struct PlaneData *PlaneThreadData;
   int xpos,ypos,size;
   PlaneThreadData = (struct PlaneData *) threadarg;
@@ -750,7 +750,7 @@ void *startPlane(void *threadarg) {
   size = PlaneThreadData -> size;
   PolyLine plane1,plane2,plane3,plane4,plane5;
   int iii = 10;
-  
+
 	x_depan = xpos-size*2;
 	x_belakang = xpos+size*6;
 
@@ -966,7 +966,7 @@ void drawTurret(int dir) {
 }
 
 void *turretHandler(void *null) {
-	
+
 	while(planeCrash==0) {
 
 		drawTurret(dir);
@@ -1033,7 +1033,7 @@ int drawBulletUp(int x, int y, int clear){
 	}
 
 	return col;
-	
+
 }
 
 int drawBulletLeft(int x, int y, int clear){
@@ -1159,7 +1159,7 @@ int drawBulletRight(int x, int y, int clear){
 	}
 
 	return col;
-	
+
 }
 
 void animateBullet(int dir) {
@@ -1352,13 +1352,13 @@ void *ioHandler(void *null) {
 
 // --------------------------------------------------------------------------------------------------------- //
 
-void draw_circle(double cx, double cy, int radius) {
+void drawCircle(double cx, double cy, int radius, int r, int g, int b, int a) {
 	inline void plot4points(double cx, double cy, double x, double y)
 	{
-		plotPixelRGBA(cx + x, cy + y, 255, 255, 255, 0);
-	  plotPixelRGBA(cx - x, cy + y, 255, 255, 255, 0);
-		plotPixelRGBA(cx + x, cy - y, 255, 255, 255, 0);
-		plotPixelRGBA(cx - x, cy - y, 255, 255, 255, 0);
+		plotPixelRGBA(cx + x, cy + y, r, g, b, a);
+	  plotPixelRGBA(cx - x, cy + y, r, g, b, a);
+		plotPixelRGBA(cx + x, cy - y, r, g, b, a);
+		plotPixelRGBA(cx - x, cy - y, r, g, b, a);
 	}
 
 	inline void plot8points(double cx, double cy, double x, double y)
@@ -1388,6 +1388,172 @@ void draw_circle(double cx, double cy, int radius) {
 	}
 }
 
+//---------------///
+void drawArcUp(double cx, double cy, int radius, int r, int g, int b, int a){
+  inline void plot4points(double cx, double cy, double x, double y)
+	{
+		//plotPixelRGBA(cx + x, cy + y, 255, 255, 255, 0);
+	  //plotPixelRGBA(cx - x, cy + y, 255, 255, 255, 0);
+		plotPixelRGBA(cx + x, cy - y, r, g, b, a);
+		plotPixelRGBA(cx - x, cy - y, r, g, b, a);
+	}
+
+	inline void plot8points(double cx, double cy, double x, double y)
+	{
+		plot4points(cx, cy, x, y);
+		plot4points(cx, cy, y, x);
+	}
+
+	int error = -radius;
+	double x = radius;
+	double y = 0;
+
+	while (x >= y)
+	{
+		plot8points(cx, cy, x, y);
+
+		error += y;
+		y++;
+		error += y;
+
+		if (error >= 0)
+		{
+			error += -x;
+			x--;
+			error += -x;
+		}
+	}
+
+}
+void drawArcDown(double cx, double cy, int radius, int r, int g, int b, int a){
+  inline void plot4points(double cx, double cy, double x, double y)
+	{
+		plotPixelRGBA(cx + x, cy + y, r, g, b, a);
+		plotPixelRGBA(cx - x, cy + y, r, g, b, a);
+	}
+
+	inline void plot8points(double cx, double cy, double x, double y)
+	{
+		plot4points(cx, cy, x, y);
+		plot4points(cx, cy, y, x);
+	}
+
+	int error = -radius;
+	double x = radius;
+	double y = 0;
+
+	while (x >= y)
+	{
+		plot8points(cx, cy, x, y);
+
+		error += y;
+		y++;
+		error += y;
+
+		if (error >= 0)
+		{
+			error += -x;
+			x--;
+			error += -x;
+		}
+	}
+
+}
+
+void drawParachute(int x, int y){
+  drawArcUp(x+45, y+47, 45, 255,0,0,0);
+  PolyLine cover;
+  initPolyline(&cover, 255, 0, 0, 0);
+  addEndPoint(&cover, x, y+47);
+  addEndPoint(&cover, x+90, y+47);
+  drawPolylineOutline(&cover);
+
+  drawCircle(x+13.3, y+47,10, 255,255,0,0);
+  floodFill(x+13.3, y+47,255,255,0,0,255,255,0,0);
+  drawCircle(x+13.3, y+47,10, 255,0,0,0);
+  floodFill(x+13.3, y+47,0,0,0,0,255,0,0,0);
+
+  drawCircle(x+34.3, y+47,10, 255,255,0,0);
+  floodFill(x+34.3, y+47,255,255,0,0,255,255,0,0);
+  drawCircle(x+34.3, y+47,10, 255,0,0,0);
+  floodFill(x+34.3, y+47,0,0,0,0,255,0,0,0);
+
+  drawCircle(x+56.3, y+47,10, 255,255,0,0);
+  floodFill(x+56.3, y+47,255,255,0,0,255,255,0,0);
+  drawCircle(x+56.3, y+47,10, 255,0,0,0);
+  floodFill(x+56.3, y+47,0,0,0,0,255,0,0,0);
+
+  drawCircle(x+77.3, y+47,10, 255,255,0,0);
+  floodFill(x+77.3, y+47,255,255,0,0,255,255,0,0);
+  drawCircle(x+77.3, y+47,10, 255,0,0,0);
+  floodFill(x+77.3, y+47,0,0,0,0,255,0,0,0);
+
+
+  drawArcDown(x+13.3, y+47,10, 0,0,0,0);
+  drawArcDown(x+34.3, y+47,10, 0,0,0,0);
+  drawArcDown(x+56.3, y+47,10, 0,0,0,0);
+  drawArcDown(x+77.3, y+47,10, 0,0,0,0);
+
+  floodFill(x+45, y+20, 0,255,0,0,255,0,0,0);
+
+  PolyLine p1,p2,p3,p4,p5;
+  initPolyline(&p1,255,255,255,0);
+  addEndPoint(&p1, x+2, y+47);
+  addEndPoint(&p1, x+45, y+100);
+  drawPolylineOutline(&p1);
+
+  initPolyline(&p2,255,255,255,0);
+  addEndPoint(&p2, x+23.5, y+47);
+  addEndPoint(&p2, x+45, y+100);
+  drawPolylineOutline(&p2);
+
+  initPolyline(&p3,255,255,255,0);
+  addEndPoint(&p3, x+45, y+47);
+  addEndPoint(&p3, x+45, y+100);
+  drawPolylineOutline(&p3);
+
+  initPolyline(&p4,255,255,255,0);
+  addEndPoint(&p4, x+66.5, y+47);
+  addEndPoint(&p4, x+45, y+100);
+  drawPolylineOutline(&p4);
+
+  initPolyline(&p5,255,255,255,0);
+  addEndPoint(&p5, x+88, y+47);
+  addEndPoint(&p5, x+45, y+100);
+  drawPolylineOutline(&p5);
+}
+
+
+//------//
+void drawPropeller(int x, int y, int scale){
+  PolyLine up, down;
+  initPolyline(&up, 255,255,0,0);
+  addEndPoint(&up, x+(5*scale), y);
+  addEndPoint(&up, x+(7*scale), y+(5*scale));
+  addEndPoint(&up, x+(scale*7), y+(scale*28));
+  addEndPoint(&up, x+(scale*3), y+(scale*28));
+  addEndPoint(&up, x+(scale*3), y+(scale*5));
+  setFirePoint(&up, x+(scale*5), y+(scale*5));
+
+  initPolyline(&down, 255,255,0,0);
+  addEndPoint(&down, x+(5*scale), y+(scale*56));
+  addEndPoint(&down, x+(7*scale), y+(scale*51));
+  addEndPoint(&down, x+(7*scale), y+(scale*28));
+  addEndPoint(&down, x+(3*scale), y+(scale*28));
+  addEndPoint(&down, x+(3*scale), y+(scale*51));
+  setFirePoint(&down, x+(scale*5), y+(scale*50));
+
+
+  drawCircle(x+(5*scale),y+(28*scale),5*scale,255,255,0,0);
+  floodFill(x+(5*scale), y+(28*scale),255,255,0,0,255,255,0,0);
+
+  drawPolylineOutline(&up);
+  fillPolyline(&up, 255,255,0,0);
+
+  drawPolylineOutline(&down);
+  fillPolyline(&down, 255,255,0,0);
+
+}
 
 
 //------//
@@ -1401,7 +1567,7 @@ int main(int argc, char *argv[]) {
 	printf("xposition : %d\n", AddPlaneData.xpos);
 	printf("yposition : %d\n", AddPlaneData.ypos);
 	printf("size constan : %d\n", AddPlaneData.size);
-	
+
     initScreen();
     clearScreen();
 
@@ -1417,26 +1583,27 @@ int main(int argc, char *argv[]) {
   */
     initScreen();
     clearScreen();
-    
-	PolyLine p;
-	initPolyline(&p, 255,0,0,0);
-	addEndPoint(&p, 200,150);
-	addEndPoint(&p, 200,200);
-	addEndPoint(&p, 150,200);
-	addEndPoint(&p, 150,150);
-	
-	setFirePoint(&p, 175, 175);
-	drawPolylineOutline(&p);
-	fillPolyline(&p, 0,255,0,0);
-	
-	int i;
-	for(i=0; i<50; i++) {
-		usleep(100000);
-		rotatePolyline(&p,p.xp,p.yp,10);
-		movePolyline(&p,10,0);
-		fillPolyline(&p, 0,255,0,0);
-	}	
+
+	// PolyLine p;
+	// initPolyline(&p, 255,0,0,0);
+	// addEndPoint(&p, 200,150);
+	// addEndPoint(&p, 200,200);
+	// addEndPoint(&p, 150,200);
+	// addEndPoint(&p, 150,150);
+	//
+	// setFirePoint(&p, 175, 175);
+	// drawPolylineOutline(&p);
+	// fillPolyline(&p, 0,255,0,0);
+	//
+	// int i;
+	// for(i=0; i<50; i++) {
+	// 	usleep(100000);
+	// 	rotatePolyline(&p,p.xp,p.yp,10);
+	// 	movePolyline(&p,10,0);
+	// 	fillPolyline(&p, 0,255,0,0);
+	// }
+  //drawParachute(200,200);
+  drawPropeller(200,200,4);
 	terminate();
     return 0;
  }
-
