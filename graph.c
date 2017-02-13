@@ -1523,6 +1523,35 @@ void drawParachute(int x, int y){
   drawPolylineOutline(&p5);
 }
 
+void drawPilot (int x, int y){
+  drawCircle(x+15, y+4, 4, 255,255,255,0);
+
+  PolyLine body;
+  initPolyline(&body, 255,255,255,0);
+  addEndPoint(&body, x+2, y+2);
+  addEndPoint(&body, x+10, y+9);
+  addEndPoint(&body, x+20, y+9);
+  addEndPoint(&body, x+28, y+2);
+  addEndPoint(&body, x+30, y+5);
+  addEndPoint(&body, x+20, y+15);
+  addEndPoint(&body, x+20, y+44);
+  addEndPoint(&body, x+16, y+44);
+  addEndPoint(&body, x+16, y+24);
+  addEndPoint(&body, x+14, y+24);
+  addEndPoint(&body, x+14, y+44);
+  addEndPoint(&body, x+10, y+44);
+  addEndPoint(&body, x+10, y+15);
+  addEndPoint(&body, x, y+5);
+  drawPolylineOutline(&body);
+
+  floodFill(x+15, y+4, 255,255,255,0,255,255,255,0);
+  floodFill(x+15, y+15, 255,255,255,0,255,255,255,0);
+}
+
+void drawPassenger(int x, int y){
+  drawPilot(x+30, y+90);
+  drawParachute(x,y);
+}
 
 //------//
 void drawPropeller(int x, int y, int scale){
@@ -1603,7 +1632,8 @@ int main(int argc, char *argv[]) {
 	// 	fillPolyline(&p, 0,255,0,0);
 	// }
   //drawParachute(200,200);
-  drawPropeller(200,200,4);
+  drawPassenger(200,200);
+  //drawPropeller(200,200,4);
 	terminate();
     return 0;
  }
