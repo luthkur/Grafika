@@ -29,6 +29,8 @@ void *turretHandler(void *);		// The thread that handle the turret and its direc
 
 void *ioHandler(void *);			// The thread that handle the bullet shooting
 
+int xcrash=800, ycrash =500;
+
 
 // UTILITY PROCEDURE----------------------------------------------------------------------------------------- //
 
@@ -818,10 +820,13 @@ void *startPlane(void *threadarg) {
         if (!planeCrash) fillPolyline(&p, 200,200,200,0);
         x_depan -= 5;
         x_belakang -= 5;
+        xcrash = plane2.xp-250;
+        ycrash = plane2.yp;
         usleep(60006);
     }
 
     deletePolyline(&p);
+    
 
     while (iii<1000){
         movePolyline(&plane1, -50, iii);
@@ -1488,7 +1493,15 @@ void drawParachute(int x, int y, int def, int clear){
 
   if (clear == 0) {
 	  floodFill(x+45, y+20, 0,254,0,0,255,0,0,0);
+  } else if (clear == -1) {
+  	  floodFill(x+45, y+20, 0,0,0,0,255,0,0,0);
+  	  clear = 0;
+  	  r = 0;
+  	  g = 0;
+  	  b = 0;
   }
+
+  
 
   drawArcUp(x+45, y+47, 45, r,0,0,0);
   PolyLine cover;
@@ -1553,6 +1566,7 @@ void drawParachute(int x, int y, int def, int clear){
   addEndPoint(&p5, a+45, y+100);
   drawPolylineOutline(&p5);
 }
+
 
 void drawPilot (int x, int y, int clear, int rot){
   int r, g, b;
@@ -1641,9 +1655,12 @@ void *drawPropeller(void *threadarg){
 
 
 
-}
 
-void pilotFall(int x, int y) {
+
+void* pilotFall() {
+	while (!planeCrash) {}
+	int x = xcrash;
+	int y = ycrash;
 	int a = 0;
 	int rot = 0;
 	for(a=1 ; a<150 ; a++) {
@@ -1651,19 +1668,38 @@ void pilotFall(int x, int y) {
 		usleep(10000);
 		drawPilot(x,y+a, 0, rot);
 		//rot *= -1;
-		//if ((a%10 == 0) && (rot<50)) rot += 5;
+		if ((a%10 == 0) && (rot>-50)) rot -= 5;
 	}
-	drawPilot(x,y+a,1, rot);
-
-	drawParachute(x-30, y+a-90, 0, 1);
-	while (y+a < vinfo.yres) {
-		drawPilot(x,y+a,1, rot);
-		drawParachute(x-30, y+a-90, 0,1);
-		usleep(20000);
-		drawPilot(x,y+a,0, rot);
-		drawParachute(x-30, y+a-90, 0,0);
+	int xa = -40;
+	int mov = 0;
+	int phase2 = 0;
+	while (y+a < vinfo.yres-10) {
+		drawPilot(x+mov,y+a,1, rot);
+		drawParachute(x-30+xa+mov, y+a-90, -xa,1);
+		usleep(12000);
+		drawPilot(x+mov,y+a,0, rot);
+		
+		
+		if (a%10 == 0) {
+			drawParachute(x-30+xa+mov, y+a-90, -xa,-1);
+			mov += 5;
+			if (!phase2) {
+				if (xa<30) xa += 5;
+				if (rot<30) rot += 5;
+				if ((xa>=30) && (rot>=30)) phase2 = 1;
+			} else {
+				if (xa>0) xa -= 7;
+				if (rot>0) rot -= 5;
+			}
+		} else {
+			drawParachute(x-30+xa+mov, y+a-90, -xa,0);
+		}
 		a++;
 	}
+	a--;
+	drawPilot(x+mov,y+a,1, rot);
+	
+	drawParachute(x-30+xa+mov, y+a-90, -xa,1);
 }
 
 
@@ -1696,6 +1732,9 @@ int main(int argc, char *argv[]) {
 	pthread_create(&planeThread,NULL,startPlane,(void *) &AddPlaneData);
 	pthread_create(&turretThread,NULL,turretHandler,NULL);
 	pthread_create(&ioThread,NULL,ioHandler,NULL);
+
+	pthread_t pilot;
+	pthread_create(&pilot, NULL, pilotFall, NULL);
   //pthread_create(&rotorThread,NULL,drawPropeller,(void *) &AddPlaneData);
 
 	// pthread_t planeThread, turretThread, ioThread;
@@ -1708,13 +1747,10 @@ int main(int argc, char *argv[]) {
 	// pthread_join(planeThread, NULL);
 	// terminate();
   
-    initScreen();
-    clearScreen();
+    // initScreen();
+    // clearScreen();
   //pthread_join(rotorThread, NULL);
-	pthread_join(turretThread, NULL);
-	pthread_join(ioThread, NULL);
-	pthread_join(planeThread, NULL);
-	terminate();
+
 
   /*
   initScreen();
@@ -1741,13 +1777,16 @@ int main(int argc, char *argv[]) {
 	// }
   //drawParachute(200,200);
   //drawPassenger(200,200);
-    drawPilot(200,200,1, 10);
-    usleep(1000000);
-    drawPilot(200,200,0, 10);
-  //drawPropeller(200,200,4);
-    pilotFall(800,500);
+  //   drawPilot(200,200,1, 10);
+  //   usleep(1000000);
+  //   drawPilot(200,200,0, 10);
+  // //drawPropeller(200,200,4);
+  //   pilotFall(800,500);
   //drawPassenger(200,200);
-
+	pthread_join(turretThread, NULL);
+	pthread_join(ioThread, NULL);
+	pthread_join(planeThread, NULL);
+	pthread_join(pilot, NULL);
 	terminate();
     return 0;
  }
