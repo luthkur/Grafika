@@ -824,35 +824,40 @@ void *startPlane(void *threadarg) {
         ycrash = plane2.yp;
         usleep(60006);
     }
-
+	
+	if(planeCrash==0) planeCrash=1;
     deletePolyline(&p);
     
+    iii = 25;
+    int ii = 0;
 	int Mantul = 0;
-	int currVel = 0;
-    while (iii<1000){
+    while (ii<1000){
+        
         movePolyline(&plane1, -50, iii);
+        rotatePolyline(&plane1, plane1.xp, plane1.yp, -10);
         fillPolyline(&plane1, 100,200,200,0);
+        
         movePolyline(&plane2, -40, iii);
+        rotatePolyline(&plane2, plane2.xp, plane2.yp, -10);
         fillPolyline(&plane2, 100,200,200,0);
-        movePolyline(&plane3, 30, iii);
-        fillPolyline(&plane3, 100,200,200,0);
-		
+        
 		if(Mantul==0) {
-			movePolyline(&plane4, 50, iii);
-			if(plane4.y[1]>=vinfo.yres) {
+			movePolyline(&plane3, 30, iii);
+			if(plane3.y[0]>=vinfo.yres||plane3.y[1]>=vinfo.yres||plane3.y[2]>=vinfo.yres) {
 				Mantul=1;
-				currVel = iii;
 			}
 		} else {
-			movePolyline(&plane4, 50, (currVel-iii));
-		}		
-		fillPolyline(&plane4, 100,200,200,0);
+			movePolyline(&plane3, 30, -iii);
+		}
+		rotatePolyline(&plane3, plane3.xp, plane3.yp, 10);
+        fillPolyline(&plane3, 100,200,200,0);
         
-		movePolyline(&plane5, 20, iii);
-        fillPolyline(&plane5, 100,200,200,0);
-        nanosleep((const struct timespec[]){{0,100000000L}},NULL);
-        iii += 50;
-        //usleep(1000000000);
+		movePolyline(&plane4, 50, iii);
+        rotatePolyline(&plane4, plane4.xp, plane4.yp, 10);
+		fillPolyline(&plane4, 100,200,200,0);
+		
+        usleep(500000);
+        ii += 10;
     }
 
 	return;
