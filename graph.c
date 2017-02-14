@@ -1376,7 +1376,7 @@ void drawCircle(double cx, double cy, int radius, int r, int g, int b, int a) {
 	inline void plot4points(double cx, double cy, double x, double y)
 	{
 		plotPixelRGBA(cx + x, cy + y, r, g, b, a);
-	  plotPixelRGBA(cx - x, cy + y, r, g, b, a);
+	    plotPixelRGBA(cx - x, cy + y, r, g, b, a);
 		plotPixelRGBA(cx + x, cy - y, r, g, b, a);
 		plotPixelRGBA(cx - x, cy - y, r, g, b, a);
 	}
@@ -1480,73 +1480,90 @@ void drawArcDown(double cx, double cy, int radius, int r, int g, int b, int a){
 
 }
 
-void drawParachute(int x, int y){
-  drawArcUp(x+45, y+47, 45, 255,0,0,0);
+void drawParachute(int x, int y, int def, int clear){
+  int r, g, b;
+  r = clear * 255;
+  g = clear * 255;
+  b = clear * 255;
+
+  if (clear == 0) {
+	  floodFill(x+45, y+20, 0,254,0,0,255,0,0,0);
+  }
+
+  drawArcUp(x+45, y+47, 45, r,0,0,0);
   PolyLine cover;
-  initPolyline(&cover, 255, 0, 0, 0);
+  initPolyline(&cover, r, 0, 0, 0);
   addEndPoint(&cover, x, y+47);
   addEndPoint(&cover, x+90, y+47);
   drawPolylineOutline(&cover);
 
-  drawCircle(x+13.3, y+47,10, 255,255,0,0);
-  floodFill(x+13.3, y+47,255,255,0,0,255,255,0,0);
-  drawCircle(x+13.3, y+47,10, 255,0,0,0);
-  floodFill(x+13.3, y+47,0,0,0,0,255,0,0,0);
+  drawCircle(x+13.3, y+47,10, 1,1,0,0);
+  if(clear) floodFill(x+13.3, y+47,1,1,0,0,1,1,0,0);
+  drawCircle(x+13.3, y+47,10, r,0,0,0);
+  if(clear) floodFill(x+13.3, y+47,0,0,0,0,255,0,0,0);
 
-  drawCircle(x+34.3, y+47,10, 255,255,0,0);
-  floodFill(x+34.3, y+47,255,255,0,0,255,255,0,0);
-  drawCircle(x+34.3, y+47,10, 255,0,0,0);
-  floodFill(x+34.3, y+47,0,0,0,0,255,0,0,0);
+  drawCircle(x+34.3, y+47,10, 1,1,0,0);
+  if(clear) floodFill(x+34.3, y+47,1,1,0,0,1,1,0,0);
+  drawCircle(x+34.3, y+47,10, r,0,0,0);
+  if(clear) floodFill(x+34.3, y+47,0,0,0,0,255,0,0,0);
 
-  drawCircle(x+56.3, y+47,10, 255,255,0,0);
-  floodFill(x+56.3, y+47,255,255,0,0,255,255,0,0);
-  drawCircle(x+56.3, y+47,10, 255,0,0,0);
-  floodFill(x+56.3, y+47,0,0,0,0,255,0,0,0);
+  drawCircle(x+56.3, y+47,10, 1,1,0,0);
+  if(clear) floodFill(x+56.3, y+47,1,1,0,0,1,1,0,0);
+  drawCircle(x+56.3, y+47,10, r,0,0,0);
+  if(clear) floodFill(x+56.3, y+47,0,0,0,0,255,0,0,0);
 
-  drawCircle(x+77.3, y+47,10, 255,255,0,0);
-  floodFill(x+77.3, y+47,255,255,0,0,255,255,0,0);
-  drawCircle(x+77.3, y+47,10, 255,0,0,0);
-  floodFill(x+77.3, y+47,0,0,0,0,255,0,0,0);
+  drawCircle(x+77.3, y+47,10, 1,1,0,0);
+  if(clear) floodFill(x+77.3, y+47,1,1,0,0,1,1,0,0);
+  drawCircle(x+77.3, y+47,10, r,0,0,0);
+  if(clear) floodFill(x+77.3, y+47,0,0,0,0,255,0,0,0);
+
+
 
   drawArcDown(x+13.3, y+47,10, 0,0,0,0);
   drawArcDown(x+34.3, y+47,10, 0,0,0,0);
   drawArcDown(x+56.3, y+47,10, 0,0,0,0);
   drawArcDown(x+77.3, y+47,10, 0,0,0,0);
 
-  floodFill(x+45, y+20, 0,255,0,0,255,0,0,0);
+  if(clear) floodFill(x+45, y+20, 0,255,0,0,255,0,0,0);
 
   PolyLine p1,p2,p3,p4,p5;
-  initPolyline(&p1,255,255,255,0);
+  int a = x + def;
+  initPolyline(&p1,r,g,b,0);
   addEndPoint(&p1, x+2, y+47);
-  addEndPoint(&p1, x+45, y+100);
+  addEndPoint(&p1, a+45, y+100);
   drawPolylineOutline(&p1);
 
-  initPolyline(&p2,255,255,255,0);
+  initPolyline(&p2,r,g,b,0);
   addEndPoint(&p2, x+23.5, y+47);
-  addEndPoint(&p2, x+45, y+100);
+  addEndPoint(&p2, a+45, y+100);
   drawPolylineOutline(&p2);
 
-  initPolyline(&p3,255,255,255,0);
+  initPolyline(&p3,r,g,b,0);
   addEndPoint(&p3, x+45, y+47);
-  addEndPoint(&p3, x+45, y+100);
+  addEndPoint(&p3, a+45, y+100);
   drawPolylineOutline(&p3);
 
-  initPolyline(&p4,255,255,255,0);
+  initPolyline(&p4,r,g,b,0);
   addEndPoint(&p4, x+66.5, y+47);
-  addEndPoint(&p4, x+45, y+100);
+  addEndPoint(&p4, a+45, y+100);
   drawPolylineOutline(&p4);
 
-  initPolyline(&p5,255,255,255,0);
+  initPolyline(&p5,r,g,b,0);
   addEndPoint(&p5, x+88, y+47);
-  addEndPoint(&p5, x+45, y+100);
+  addEndPoint(&p5, a+45, y+100);
   drawPolylineOutline(&p5);
 }
 
-void drawPilot (int x, int y){
-  drawCircle(x+15, y+4, 4, 255,255,255,0);
+void drawPilot (int x, int y, int clear, int rot){
+  int r, g, b;
+  r = clear * 255;
+  g = clear * 255;
+  b = clear * 255;
+  drawCircle(x+15, y+4, 4, r,g,b,0);
 
   PolyLine body;
-  initPolyline(&body, 255,255,255,0);
+  
+  initPolyline(&body, r,g,b,0);
   addEndPoint(&body, x+2, y+2);
   addEndPoint(&body, x+10, y+9);
   addEndPoint(&body, x+20, y+9);
@@ -1561,15 +1578,21 @@ void drawPilot (int x, int y){
   addEndPoint(&body, x+10, y+44);
   addEndPoint(&body, x+10, y+15);
   addEndPoint(&body, x, y+5);
-  drawPolylineOutline(&body);
+  //drawPolylineOutline(&body);
+  int a = 0;
+  a = rot/4;
+  if(clear == 0) floodFill(x+15-a, y+10, 0,0,0,0,0,0,0,0);
+  rotatePolyline(&body,x+15,y+4,rot);
+  drawCircle(x+15, y+4, 4, r,g,b,0);
+  floodFill(x+15, y+4, r,g,b,0,r,g,b,0);
+  
 
-  floodFill(x+15, y+4, 255,255,255,0,255,255,255,0);
-  floodFill(x+15, y+15, 255,255,255,0,255,255,255,0);
+  if (clear==1) floodFill(x+15-a, y+10, r,g,b,0,r,g,b,0);
 }
 
 void drawPassenger(int x, int y){
-  drawPilot(x+30, y+90);
-  drawParachute(x,y);
+  drawPilot(x+30, y+90, 1, 0);
+  drawParachute(x,y,0,1);
 }
 
 //------//
@@ -1618,9 +1641,46 @@ void *drawPropeller(void *threadarg){
 
 
 
+}
+
+void pilotFall(int x, int y) {
+	int a = 0;
+	int rot = 0;
+	for(a=1 ; a<150 ; a++) {
+		drawPilot(x,y+a, 1, rot);
+		usleep(10000);
+		drawPilot(x,y+a, 0, rot);
+		//rot *= -1;
+		//if ((a%10 == 0) && (rot<50)) rot += 5;
+	}
+	drawPilot(x,y+a,1, rot);
+
+	drawParachute(x-30, y+a-90, 0, 1);
+	while (y+a < vinfo.yres) {
+		drawPilot(x,y+a,1, rot);
+		drawParachute(x-30, y+a-90, 0,1);
+		usleep(20000);
+		drawPilot(x,y+a,0, rot);
+		drawParachute(x-30, y+a-90, 0,0);
+		a++;
+	}
+}
+
+
 //------//
 
 int main(int argc, char *argv[]) {
+
+	// struct PlaneData AddPlaneData;
+	// AddPlaneData.xpos = atoi(argv[1]);
+	// AddPlaneData.ypos = atoi(argv[2]);
+	// AddPlaneData.size = atoi(argv[3]);
+	// printf("xposition : %d\n", AddPlaneData.xpos);
+	// printf("yposition : %d\n", AddPlaneData.ypos);
+	// printf("size constan : %d\n", AddPlaneData.size);
+
+ //    initScreen();
+ //    clearScreen();
 
 	struct PlaneData AddPlaneData;
   struct downersize;
@@ -1638,6 +1698,18 @@ int main(int argc, char *argv[]) {
 	pthread_create(&ioThread,NULL,ioHandler,NULL);
   //pthread_create(&rotorThread,NULL,drawPropeller,(void *) &AddPlaneData);
 
+	// pthread_t planeThread, turretThread, ioThread;
+	// pthread_create(&planeThread,NULL,startPlane,(void *) &AddPlaneData);
+	// pthread_create(&turretThread,NULL,turretHandler,NULL);
+	// pthread_create(&ioThread,NULL,ioHandler,NULL);
+
+	// pthread_join(turretThread, NULL);
+	// pthread_join(ioThread, NULL);
+	// pthread_join(planeThread, NULL);
+	// terminate();
+  
+    initScreen();
+    clearScreen();
   //pthread_join(rotorThread, NULL);
 	pthread_join(turretThread, NULL);
 	pthread_join(ioThread, NULL);
@@ -1668,6 +1740,12 @@ int main(int argc, char *argv[]) {
 	// 	fillPolyline(&p, 0,255,0,0);
 	// }
   //drawParachute(200,200);
+  //drawPassenger(200,200);
+    drawPilot(200,200,1, 10);
+    usleep(1000000);
+    drawPilot(200,200,0, 10);
+  //drawPropeller(200,200,4);
+    pilotFall(800,500);
   //drawPassenger(200,200);
 
 	terminate();
