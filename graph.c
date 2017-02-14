@@ -750,7 +750,8 @@ void *startPlane(void *threadarg) {
   size = PlaneThreadData -> size;
   PolyLine plane1,plane2,plane3,plane4,plane5;
   int iii = 10;
-
+  int x = xpos +size*6;
+  int y = ypos -size*2;
 	x_depan = xpos-size*2;
 	x_belakang = xpos+size*6;
 
@@ -759,8 +760,8 @@ void *startPlane(void *threadarg) {
 	initPolyline(&plane1, rplane, gplane, bplane, aplane);
 	addEndPoint(&plane1, xpos-size*2, ypos-size);
 	addEndPoint(&plane1, xpos-size*4, ypos+size);
-	addEndPoint(&plane1, xpos+size*6, ypos+size);
-	addEndPoint(&plane1, xpos+size*6, ypos-size);
+	addEndPoint(&plane1, xpos+size*8, ypos+size);
+	addEndPoint(&plane1, xpos+size*8, ypos-size);
 	setFirePoint(&plane1, xpos, ypos);
 
 	initPolyline(&plane2, rplane, gplane, bplane, aplane);
@@ -781,11 +782,25 @@ void *startPlane(void *threadarg) {
 	addEndPoint(&plane4, xpos+size*6, ypos+size);
 	setFirePoint(&plane4, xpos+size*5, ypos+size*2);
 
-	initPolyline(&plane5, rplane, gplane, bplane, aplane);
+	initPolyline(&plane5, rplane, gplane, gplane, aplane);
 	addEndPoint(&plane5, xpos+size*4, ypos-size);
-	addEndPoint(&plane5, xpos+size*6, ypos-size*4);
-	addEndPoint(&plane5, xpos+size*6, ypos-size);
+	addEndPoint(&plane5, xpos+size*8, ypos-size*6);
+	addEndPoint(&plane5, xpos+size*8, ypos-size);
 	setFirePoint(&plane5, xpos+size*5, ypos-size*2);
+
+  int scale = size/3;
+  PolyLine p;
+    initPolyline(&p, rplane,gplane,gplane,aplane);
+    setFirePoint(&p, x,y);
+    addEndPoint(&p,x-(scale),y);
+    addEndPoint(&p,x-(scale),y-(2*scale));
+    addEndPoint(&p,x,y-(3*scale));
+    addEndPoint(&p,x+(scale),y-(2*scale));
+    addEndPoint(&p,x+(scale),y);
+    addEndPoint(&p,x+(scale),y+(2*scale));
+    addEndPoint(&p,x,y+(3*scale));
+    addEndPoint(&p,x-(scale),y+(2*scale));
+    drawPolylineOutline(&p);
 
     while (planeCrash==0 && x_belakang>0){
         movePolyline(&plane1, -5, 0);
@@ -798,11 +813,15 @@ void *startPlane(void *threadarg) {
         if (!planeCrash) fillPolyline(&plane4, 100,200,200,0);
         movePolyline(&plane5, -5, 0);
         if (!planeCrash) fillPolyline(&plane5, 100,200,200,0);
+        movePolyline(&p, -5, 0);
+        rotatePolyline(&p,p.xp,p.yp,30);
+        if (!planeCrash) fillPolyline(&p, 200,200,200,0);
         x_depan -= 5;
         x_belakang -= 5;
-        usleep(50005);
+        usleep(60006);
     }
 
+    deletePolyline(&p);
 
     while (iii<1000){
         movePolyline(&plane1, -50, iii);
@@ -817,7 +836,7 @@ void *startPlane(void *threadarg) {
         fillPolyline(&plane5, 100,200,200,0);
         nanosleep((const struct timespec[]){{0,100000000L}},NULL);
         iii += 50;
-        usleep(1000000000);
+        //usleep(1000000000);
     }
 
 	return;
@@ -1489,7 +1508,6 @@ void drawParachute(int x, int y){
   drawCircle(x+77.3, y+47,10, 255,0,0,0);
   floodFill(x+77.3, y+47,0,0,0,0,255,0,0,0);
 
-
   drawArcDown(x+13.3, y+47,10, 0,0,0,0);
   drawArcDown(x+34.3, y+47,10, 0,0,0,0);
   drawArcDown(x+56.3, y+47,10, 0,0,0,0);
@@ -1555,64 +1573,81 @@ void drawPassenger(int x, int y){
 }
 
 //------//
-void drawPropeller(int x, int y, int scale){
-  PolyLine up, down;
-  initPolyline(&up, 255,255,0,0);
-  addEndPoint(&up, x+(5*scale), y);
-  addEndPoint(&up, x+(7*scale), y+(5*scale));
-  addEndPoint(&up, x+(scale*7), y+(scale*28));
-  addEndPoint(&up, x+(scale*3), y+(scale*28));
-  addEndPoint(&up, x+(scale*3), y+(scale*5));
-  setFirePoint(&up, x+(scale*5), y+(scale*5));
+void *drawPropeller(void *threadarg){
+  struct PlaneData *PlaneThreadData;
+  PlaneThreadData = (struct PlaneData *) threadarg;
+  int x = 1000;
+  int y = 100;
+  int scale = 3; //any smaller than 3 the rotor will be distrored
+  PolyLine p;
+  PolyLine kotakhebat;
+  initPolyline(&kotakhebat, 255,255,0,0);
+  addEndPoint(&kotakhebat, x-70,y-70);
+	addEndPoint(&kotakhebat, x+70,y-70);
+	addEndPoint(&kotakhebat, x+70,y+70);
+  addEndPoint(&kotakhebat, x-70,y+70);
+  drawPolylineOutline(&kotakhebat);
+  setFirePoint(&kotakhebat,x,y);
 
-  initPolyline(&down, 255,255,0,0);
-  addEndPoint(&down, x+(5*scale), y+(scale*56));
-  addEndPoint(&down, x+(7*scale), y+(scale*51));
-  addEndPoint(&down, x+(7*scale), y+(scale*28));
-  addEndPoint(&down, x+(3*scale), y+(scale*28));
-  addEndPoint(&down, x+(3*scale), y+(scale*51));
-  setFirePoint(&down, x+(scale*5), y+(scale*50));
+  initPolyline(&p, 255,255,0,0);
+  setFirePoint(&p, x,y);
+  addEndPoint(&p,x-(2*scale),y);
+  addEndPoint(&p,x-(2*scale),y-(12*scale));
+  addEndPoint(&p,x,y-(15*scale));
+  addEndPoint(&p,x+(2*scale),y-(12*scale));
+  addEndPoint(&p,x+(2*scale),y);
+  addEndPoint(&p,x+(2*scale),y+(12*scale));
+  addEndPoint(&p,x,y+(15*scale));
+  addEndPoint(&p,x-(2*scale),y+(12*scale));
+  drawCircle(x,y,2*scale,255,255,0,0);
+  floodFill(x, y,255,255,0,0,255,255,0,0);
+  drawPolylineOutline(&p);
+  //fillPolyline(&p, 255,255,0,0);
+  //fillPolyline(&p, 255,255,0,0);
 
+  while(planeCrash == 0)
+  {
+    usleep(100000);
+    movePolyline(&kotakhebat,-5,0);
+    movePolyline(&p,-5,0);
+    rotatePolyline(&p,p.xp,p.yp,10);
 
-  drawCircle(x+(5*scale),y+(28*scale),5*scale,255,255,0,0);
-  floodFill(x+(5*scale), y+(28*scale),255,255,0,0,255,255,0,0);
-
-  drawPolylineOutline(&up);
-  fillPolyline(&up, 255,255,0,0);
-
-  drawPolylineOutline(&down);
-  fillPolyline(&down, 255,255,0,0);
+  }
 
 }
+
 
 
 //------//
 
 int main(int argc, char *argv[]) {
-/*
+
 	struct PlaneData AddPlaneData;
+  struct downersize;
 	AddPlaneData.xpos = atoi(argv[1]);
 	AddPlaneData.ypos = atoi(argv[2]);
 	AddPlaneData.size = atoi(argv[3]);
 	printf("xposition : %d\n", AddPlaneData.xpos);
 	printf("yposition : %d\n", AddPlaneData.ypos);
 	printf("size constan : %d\n", AddPlaneData.size);
-
     initScreen();
     clearScreen();
-
-	pthread_t planeThread, turretThread, ioThread;
+	pthread_t planeThread, turretThread, ioThread,rotorThread;
 	pthread_create(&planeThread,NULL,startPlane,(void *) &AddPlaneData);
 	pthread_create(&turretThread,NULL,turretHandler,NULL);
 	pthread_create(&ioThread,NULL,ioHandler,NULL);
+  //pthread_create(&rotorThread,NULL,drawPropeller,(void *) &AddPlaneData);
 
+  //pthread_join(rotorThread, NULL);
 	pthread_join(turretThread, NULL);
 	pthread_join(ioThread, NULL);
 	pthread_join(planeThread, NULL);
 	terminate();
+
+  /*
+  initScreen();
+  clearScreen();
   */
-    initScreen();
-    clearScreen();
 
 	// PolyLine p;
 	// initPolyline(&p, 255,0,0,0);
@@ -1633,8 +1668,8 @@ int main(int argc, char *argv[]) {
 	// 	fillPolyline(&p, 0,255,0,0);
 	// }
   //drawParachute(200,200);
-  drawPassenger(200,200);
-  //drawPropeller(200,200,4);
+  //drawPassenger(200,200);
+
 	terminate();
     return 0;
  }
