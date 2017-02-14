@@ -817,6 +817,7 @@ void *startPlane(void *threadarg) {
         fillPolyline(&plane5, 100,200,200,0);
         nanosleep((const struct timespec[]){{0,100000000L}},NULL);
         iii += 50;
+        usleep(1000000000);
     }
 
 	return;
