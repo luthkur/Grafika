@@ -828,12 +828,12 @@ void *startPlane(void *threadarg) {
 	if(planeCrash==0) planeCrash=1;
     deletePolyline(&p);
     
-    iii = 25;
+    iii = 30;
     int ii = 0;
 	int Mantul = 0;
     while (ii<1000){
         
-        movePolyline(&plane1, -50, iii);
+        movePolyline(&plane1, -80, iii);
         rotatePolyline(&plane1, plane1.xp, plane1.yp, -10);
         fillPolyline(&plane1, 100,200,200,0);
         
@@ -847,12 +847,12 @@ void *startPlane(void *threadarg) {
 				Mantul=1;
 			}
 		} else {
-			movePolyline(&plane3, 30, -iii);
+			movePolyline(&plane3, 40, -iii);
 		}
 		rotatePolyline(&plane3, plane3.xp, plane3.yp, 10);
         fillPolyline(&plane3, 100,200,200,0);
         
-		movePolyline(&plane4, 50, iii);
+		movePolyline(&plane4, 60, iii);
         rotatePolyline(&plane4, plane4.xp, plane4.yp, 10);
 		fillPolyline(&plane4, 100,200,200,0);
 		
