@@ -30,6 +30,10 @@ void *turretHandler(void *);		// The thread that handle the turret and its direc
 void *ioHandler(void *);			// The thread that handle the bullet shooting
 
 int xcrash=800, ycrash =500;
+//int xcrash=0, ycrash=0;
+
+int max_y_point;
+int less_than_maxy = 0;
 
 
 // UTILITY PROCEDURE----------------------------------------------------------------------------------------- //
@@ -695,18 +699,54 @@ void movePolyline(PolyLine* p, int dx, int dy) {
 	int tempy;
 
 	tempx = (*p).xp + dx;
-	tempy = (*p).yp + dy;
+	
+	// NORMAL PATH
+	//tempy = (*p).yp + dy;
+	
+	// PARABOLIC PATH
+	if (((*p).yp + dy) < max_y_point) {
+		less_than_maxy = 1;
+	}
+	
+	if (less_than_maxy == 1) {
+		tempy = (*p).yp - dy;
+	} else {
+		tempy = (*p).yp + dy;
+	}
+	
 	(*p).xp = tempx;
 	(*p).yp = tempy;
 
 	int i;
 	for(i=0; i<(*p).PointCount; i++) {
+
 		tempx = (*p).x[i] + dx;
-		tempy = (*p).y[i] + dy;
+		
+		
+		// NORMAL PATH
+		//tempy = (*p).y[i] + dy;
+		
+		// PARABOLIC PATH
+		if ((*p).y[i] + dy < max_y_point) {
+			less_than_maxy = 1;
+		}
+
+		if (less_than_maxy == 1) {
+			tempy = (*p).y[i] - dy;
+		} else {
+			tempy = (*p).y[i] + dy;
+		}
+		
+		
+		//printf("tempx-y: %d %d %d -  %d %d : %d, %d\n", i, dx, dy, (*p).x[i], (*p).y[i], tempx, tempy);
+		
+		
 		(*p).x[i] = tempx;
 		(*p).y[i] = tempy;
 	}
+	
 	drawPolylineOutline(p);
+
 }
 
 void rotatePolyline(PolyLine* p, int xr, int yr, double degrees) {
@@ -804,6 +844,17 @@ void *startPlane(void *threadarg) {
     addEndPoint(&p,x-(scale),y+(2*scale));
     drawPolylineOutline(&p);
 
+
+
+
+	/**
+	 * CHANGES:
+	 * 1. make it to move in a parabolic path
+	 * 2. decrease the dy value till the maximum height and increase till the initial y position
+	 */
+
+	//NORMAL PATH
+	/*
     while (planeCrash==0 && x_belakang>0){
         movePolyline(&plane1, -5, 0);
         if (!planeCrash) fillPolyline(&plane1, 100,200,200,0);
@@ -824,6 +875,46 @@ void *startPlane(void *threadarg) {
         ycrash = plane2.yp;
         usleep(60006);
     }
+    */
+    
+    /* PARABOLIC PATH */
+    
+    while (planeCrash==0 && x_belakang>0) {
+		
+		//printf("plane 1\n");
+	    movePolyline(&plane1, -5, -3);
+        if (!planeCrash) fillPolyline(&plane1, 100,200,200,0);
+        
+        //printf("plane 2\n");
+        movePolyline(&plane2, -5, -3);
+        if (!planeCrash) fillPolyline(&plane2, 100,200,200,0);
+        
+        //printf("plane 3\n");
+        movePolyline(&plane3, -5, -3);
+        if (!planeCrash) fillPolyline(&plane3, 100,200,200,0);
+        
+        //printf("plane 4\n");
+        movePolyline(&plane4, -5, -3);
+        if (!planeCrash) fillPolyline(&plane4, 100,200,200,0);
+        
+        //printf("plane 5\n");
+        movePolyline(&plane5, -5, -3);
+        if (!planeCrash) fillPolyline(&plane5, 100,200,200,0);
+        
+        //printf("plane rotation\n");
+        movePolyline(&p, -5, -3);
+        rotatePolyline(&p,p.xp,p.yp,30);
+        if (!planeCrash) fillPolyline(&p, 200,200,200,0);
+        x_depan -= 5;
+        x_belakang -= 5;
+        xcrash = plane2.xp-250;
+        ycrash = plane2.yp;
+        usleep(60006);
+		
+		//printf("not crash\n");
+		
+    }
+    
 	
 	if(planeCrash==0) planeCrash=1;
     deletePolyline(&p);
@@ -837,9 +928,6 @@ void *startPlane(void *threadarg) {
         rotatePolyline(&plane1, plane1.xp, plane1.yp, -10);
         fillPolyline(&plane1, 100,200,200,0);
         
-        // movePolyline(&plane2, 0, iii+30);
-        // rotatePolyline(&plane2, plane2.xp, plane2.yp, -10);
-        // fillPolyline(&plane2, 100,200,200,0);
         
 		if(Mantul==0) {
 			movePolyline(&plane3, 30, iii);
@@ -1744,6 +1832,10 @@ int main(int argc, char *argv[]) {
 	printf("size constan : %d\n", AddPlaneData.size);
     initScreen();
     clearScreen();
+    
+    max_y_point = vinfo.yres / 4;
+    printf("max_y_point: %d\n", max_y_point);
+    
 	pthread_t planeThread, turretThread, ioThread,rotorThread;
 	pthread_create(&planeThread,NULL,startPlane,(void *) &AddPlaneData);
 	pthread_create(&turretThread,NULL,turretHandler,NULL);
