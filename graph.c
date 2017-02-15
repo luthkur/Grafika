@@ -918,21 +918,16 @@ void *startPlane(void *threadarg) {
 	
 	if(planeCrash==0) planeCrash=1;
     deletePolyline(&p);
-    
-    iii = 25;
+    iii = 60;
     int ii = 0;
 	int Mantul = 0;
+	deletePolyline(&plane2);
     while (ii<1000){
         
-        movePolyline(&plane1, -50, iii);
+        movePolyline(&plane1, -60, iii);
         rotatePolyline(&plane1, plane1.xp, plane1.yp, -10);
         fillPolyline(&plane1, 100,200,200,0);
         
-        printf("mantul 0\n");
-        
-        movePolyline(&plane2, -40, iii);
-        rotatePolyline(&plane2, plane2.xp, plane2.yp, -10);
-        fillPolyline(&plane2, 100,200,200,0);
         
 		if(Mantul==0) {
 			movePolyline(&plane3, 30, iii);
@@ -940,12 +935,12 @@ void *startPlane(void *threadarg) {
 				Mantul=1;
 			}
 		} else {
-			movePolyline(&plane3, 30, -iii);
+			movePolyline(&plane3, 80, -iii);
 		}
 		rotatePolyline(&plane3, plane3.xp, plane3.yp, 10);
         fillPolyline(&plane3, 100,200,200,0);
         
-		movePolyline(&plane4, 50, iii);
+		movePolyline(&plane4, 120, iii);
         rotatePolyline(&plane4, plane4.xp, plane4.yp, 10);
 		fillPolyline(&plane4, 100,200,200,0);
 		
