@@ -13,19 +13,20 @@ struct fb_var_screeninfo vinfo;     // Struct Variable Screeninfo
 struct fb_fix_screeninfo finfo;     // Struct Fixed Screeninfo
 long int screensize = 0;            // Ukuran data framebuffer
 char *fbp = 0;                      // Framebuffer di memori internal
-int borderx = 0;                    // Ukuran layar koordinat x
-int bordery = 0;                    // Ukuran layar koordinat y
-int xmiddle = 1366 / 2;
-int ymiddle = (768 / 2) - 20;
+
+int borderwidth = 25;               // The border width, distance from the actual screenBorder
+int xmiddle;
+int ymiddle;
 
 void *ioHandler(void *);			// The thread that handle the bullet shooting
+
 
 // UTILITY PROCEDURE----------------------------------------------------------------------------------------- //
 
 int isOverflow(int _x , int _y) {
-//Cek apakah kooordinat (x,y) sudah melewati batas layar
+	//Cek apakah kooordinat (x,y) sudah melewati batas layar
     int result;
-    if ( (_x > borderx+xmiddle ||  _y > bordery+ymiddle ) || (_x < borderx-xmiddle ||  _y < bordery-ymiddle)) {
+    if ( _x > vinfo.xres-borderwidth || _y > vinfo.yres-borderwidth || _x < borderwidth-1 || _y < borderwidth-1 ) {
         result = 1;
     }
     else {
@@ -40,6 +41,7 @@ void terminate() {
      close(fbfd);
 }
 
+void drawScreenBorder();
 
 // STRUKTUR DATA BLOCK CHARACTER---------------------------------------------------------------------------- //
 
@@ -103,8 +105,7 @@ int isPixelColor(int _x, int _y, int r, int g, int b, int a) {
 }
 
 void initScreen() {
-	//Mapping framebuffer ke memori internal
-
+	 // Mapping framebuffer ke memori internal
      // Buka framebuffer
      fbfd = open("/dev/fb0", O_RDWR);
      if (fbfd == -1) {
@@ -136,24 +137,31 @@ void initScreen() {
          exit(4);
      }
      printf("The framebuffer device was mapped to memory successfully.\n");
-
+     
+     if (!vinfo.bits_per_pixel == 32) {
+		perror("bpp NOT SUPPORTED");
+		exit(0);
+	 }
+	 
+     xmiddle = vinfo.xres/2;
+     ymiddle = vinfo.yres/2;
+    
 }
 
 void clearScreen() {
-//Mewarnai latar belakang screen dengan warna putih
+	
+	//Mewarnai latar belakang screen dengan warna putih
     int x = 0;
     int y = 0;
-    for (y = 0; y < vinfo.yres - 150 ;y++) {
-		for (x = 0; x < vinfo.xres ; x++) {
-			if (vinfo.bits_per_pixel == 32) {
-                plotPixelRGBA(x,y,0,0,0,0);
-            } else  { //asumsi mode 16 bit per piksel
-				perror("bpp NOT SUPPORTED");
-				exit(0);
-            }
+    for (y = 0; y < vinfo.yres; y++) {
+		for (x = 0; x < vinfo.xres; x++) {
+
+			plotPixelRGBA(x,y,0,0,0,0);
 
         }
 	}
+	drawScreenBorder();
+	
 }
 
 
@@ -267,8 +275,17 @@ void initLine(Line* l, int xa, int ya, int xb, int yb, int rx, int gx, int bx, i
 }
 
 int drawLine(Line* l) {
+	
+	if(isOverflow((*l).x1, (*l).y1) && isOverflow((*l).x2, (*l).y2)) {
+		return 0; // Do Nothing if both of the endPoint overflowed
+		
+	} else if(isOverflow((*l).x1, (*l).y1) || isOverflow((*l).x2, (*l).y2)) {
+		// If one of the endPoint overflowed
+	
+	}
+	
 	int col = 0;
-
+	
 	// Coord. of the next point to be displayed
 	int x = (*l).x1;
 	int y = (*l).y1;
@@ -343,9 +360,11 @@ int drawLine(Line* l) {
 			y++;
 
 		}
-
+	
 	}
+	
 	return col;
+	
 }
 
 
@@ -353,10 +372,9 @@ int drawLine(Line* l) {
 
 void floodFill(int x,int y, int r,int g,int b,int a, int rb,int gb,int bb,int ab) {
 // rgba is the color of the fill, rbgbbbab is the color of the border
-
-	if(!isPixelColor(x,y, r,g,b,a)) {
-		if(!isPixelColor(x,y, rb,gb,bb,ab)) {
-			if((!isOverflow(x,y)) ) {
+	if((!isOverflow(x,y)) ) {
+		if(!isPixelColor(x,y, r,g,b,a)) {
+			if(!isPixelColor(x,y, rb,gb,bb,ab)) {
 
 				plotPixelRGBA(x,y, r,g,b,a);
 				floodFill(x+1,y, r,g,b,a, rb,gb,bb,ab);
@@ -420,6 +438,32 @@ void fillPolyline(PolyLine* p, int rx, int gx, int bx, int ax) {
 	floodFill((*p).xp,(*p).yp, rx,gx,bx,ax, ((*p).r),((*p).g),((*p).b),((*p).a));
 }
 
+void drawScreenBorder() {
+	
+	PolyLine p;
+	initPolyline(&p,0,0,255,0);
+	addEndPoint(&p, borderwidth,borderwidth);
+	addEndPoint(&p, borderwidth,vinfo.yres-borderwidth);
+	addEndPoint(&p, vinfo.xres-borderwidth,vinfo.yres-borderwidth);
+	addEndPoint(&p, vinfo.xres-borderwidth,borderwidth);
+	drawPolylineOutline(&p);
+  
+  // loop method untuk mendemonstarsikan menulis border berbagai ukuran
+  // hanya jalan jika isOverflow menggunakan metode seperti di graph.c
+  /*
+  PolyLine p[11];
+  for(int i = 1; i < 10; i++)
+  {
+    initPolyline(&p[i],255,0,0,0);
+    addEndPoint(&p[i], xmiddle-borderx*i,ymiddle-bordery*i);
+    addEndPoint(&p[i], xmiddle+borderx*i,ymiddle-bordery*i);
+    addEndPoint(&p[i], xmiddle+borderx*i,ymiddle+bordery*i);
+    addEndPoint(&p[i], xmiddle-borderx*i,ymiddle+bordery*i);
+    drawPolylineOutline(&p[i]);
+  }
+  */
+  
+}
 
 // METODE ANIMASI POLYLINE---------------------------------------------------------------------------------- //
 
@@ -620,42 +664,14 @@ void drawArcDown(double cx, double cy, int radius, int r, int g, int b, int a){
 
 }
 
-void drawScreenBorder()
-{
-
-  // the border drawing methode
-  PolyLine p;
-  initPolyline(&p,0,0,255,0);
-  addEndPoint(&p, xmiddle-borderx,ymiddle-bordery);
-  addEndPoint(&p, xmiddle+borderx,ymiddle-bordery);
-  addEndPoint(&p, xmiddle+borderx,ymiddle+bordery);
-  addEndPoint(&p, xmiddle-borderx,ymiddle+bordery);
-  drawPolylineOutline(&p);
-  // loop method untuk mendemonstarsikan menulis border berbagai ukuran
-  // hanya jalan jika isOverflow menggunakan metode seperti di graph.c
-  /*
-  PolyLine p[11];
-  for(int i = 1; i < 10; i++)
-  {
-    initPolyline(&p[i],255,0,0,0);
-    addEndPoint(&p[i], xmiddle-borderx*i,ymiddle-bordery*i);
-    addEndPoint(&p[i], xmiddle+borderx*i,ymiddle-bordery*i);
-    addEndPoint(&p[i], xmiddle+borderx*i,ymiddle+bordery*i);
-    addEndPoint(&p[i], xmiddle-borderx*i,ymiddle+bordery*i);
-    drawPolylineOutline(&p[i]);
-  }
-  */
-}
-
 // --------------------------------------------------------------------------------------------------------- //
 
 int main(int argc, char *argv[]) {
+    
     initScreen();
     clearScreen();
-    borderx = atoi(argv[1]) / 2;
-    bordery = atoi(argv[2]) / 2;
-    drawScreenBorder();
-    PolyLine p;
+    
+	PolyLine p;
     initPolyline(&p, 255,0,0,0);
     addEndPoint(&p, xmiddle-5,ymiddle-5);
     addEndPoint(&p, xmiddle+5,ymiddle-5);
@@ -673,6 +689,9 @@ int main(int argc, char *argv[]) {
       scalePolyline(&p,p.xp,p.yp,2.0);
       fillPolyline(&p, 0,255,0,0);
     }
+
     terminate();
     return 0;
- }
+    
+}
+
