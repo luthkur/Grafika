@@ -13,16 +13,19 @@ struct fb_var_screeninfo vinfo;     // Struct Variable Screeninfo
 struct fb_fix_screeninfo finfo;     // Struct Fixed Screeninfo
 long int screensize = 0;            // Ukuran data framebuffer
 char *fbp = 0;                      // Framebuffer di memori internal
+int borderx = 0;                    // Ukuran layar koordinat x
+int bordery = 0;                    // Ukuran layar koordinat y
+int xmiddle = 1366 / 2;
+int ymiddle = (768 / 2) - 20;
 
 void *ioHandler(void *);			// The thread that handle the bullet shooting
-
 
 // UTILITY PROCEDURE----------------------------------------------------------------------------------------- //
 
 int isOverflow(int _x , int _y) {
 //Cek apakah kooordinat (x,y) sudah melewati batas layar
     int result;
-    if ( _x > vinfo.xres ||  _y > vinfo.yres -20 ) {
+    if ( (_x > borderx+xmiddle ||  _y > bordery+ymiddle ) || (_x < borderx-xmiddle ||  _y < bordery-ymiddle)) {
         result = 1;
     }
     else {
@@ -512,7 +515,7 @@ void *ioHandler(void *null) {
 
 		ch = getchar();
 		if (ch == '\n') {
-			
+
 		}
 
 	}
@@ -617,31 +620,59 @@ void drawArcDown(double cx, double cy, int radius, int r, int g, int b, int a){
 
 }
 
+void drawScreenBorder()
+{
+
+  // the border drawing methode
+  PolyLine p;
+  initPolyline(&p,0,0,255,0);
+  addEndPoint(&p, xmiddle-borderx,ymiddle-bordery);
+  addEndPoint(&p, xmiddle+borderx,ymiddle-bordery);
+  addEndPoint(&p, xmiddle+borderx,ymiddle+bordery);
+  addEndPoint(&p, xmiddle-borderx,ymiddle+bordery);
+  drawPolylineOutline(&p);
+  // loop method untuk mendemonstarsikan menulis border berbagai ukuran
+  // hanya jalan jika isOverflow menggunakan metode seperti di graph.c
+  /*
+  PolyLine p[11];
+  for(int i = 1; i < 10; i++)
+  {
+    initPolyline(&p[i],255,0,0,0);
+    addEndPoint(&p[i], xmiddle-borderx*i,ymiddle-bordery*i);
+    addEndPoint(&p[i], xmiddle+borderx*i,ymiddle-bordery*i);
+    addEndPoint(&p[i], xmiddle+borderx*i,ymiddle+bordery*i);
+    addEndPoint(&p[i], xmiddle-borderx*i,ymiddle+bordery*i);
+    drawPolylineOutline(&p[i]);
+  }
+  */
+}
 
 // --------------------------------------------------------------------------------------------------------- //
 
 int main(int argc, char *argv[]) {
     initScreen();
     clearScreen();
-    
-	PolyLine p;
-	initPolyline(&p, 255,0,0,0);
-	addEndPoint(&p, 200,150);
-	addEndPoint(&p, 200,200);
-	addEndPoint(&p, 150,200);
-	
-	setFirePoint(&p, 185, 185);
-	drawPolylineOutline(&p);
-	fillPolyline(&p, 0,255,0,0);
-	
-	int i;
-	for(i=0; i<50; i++) {
-	 	usleep(500000);
-	 	scalePolyline(&p,p.xp,p.yp,1.1);
-	 	fillPolyline(&p, 0,255,0,0);
-	}
-	
-	terminate();
+    borderx = atoi(argv[1]) / 2;
+    bordery = atoi(argv[2]) / 2;
+    drawScreenBorder();
+    PolyLine p;
+    initPolyline(&p, 255,0,0,0);
+    addEndPoint(&p, xmiddle-5,ymiddle-5);
+    addEndPoint(&p, xmiddle+5,ymiddle-5);
+    addEndPoint(&p, xmiddle+5,ymiddle+5);
+    addEndPoint(&p, xmiddle-5,ymiddle+5);
+    setFirePoint(&p, xmiddle, ymiddle);
+    drawPolylineOutline(&p);
+
+    fillPolyline(&p, 0,255,0,0);
+
+    int i;
+
+    for(i=0; i<50; i++) {
+      usleep(1000000);
+      scalePolyline(&p,p.xp,p.yp,2.0);
+      fillPolyline(&p, 0,255,0,0);
+    }
+    terminate();
     return 0;
  }
- 
