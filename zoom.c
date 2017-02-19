@@ -7,6 +7,7 @@
 #include <sys/ioctl.h>
 #include <time.h>
 #include <math.h>
+#include <termios.h>
 
 int fbfd = 0;                       // Filebuffer Filedescriptor
 struct fb_var_screeninfo vinfo;     // Struct Variable Screeninfo
@@ -39,6 +40,27 @@ void terminate() {
 	//Pengakhiran program.
      munmap(fbp, screensize);
      close(fbfd);
+}
+
+//read char without print
+char getch() {
+    char buf = 0;
+    struct termios old = {0};
+    struct termios new = {0};
+    if (tcgetattr(0, &old) < 0)
+            perror("tcsetattr()");
+    new = old;
+    new.c_lflag &= ~ICANON;
+    new.c_lflag &= ~ECHO;
+    new.c_cc[VMIN] = 1;
+    new.c_cc[VTIME] = 0;
+    if (tcsetattr(0, TCSANOW, &new) < 0)
+            perror("tcsetattr ICANON");
+    if (read(0, &buf, 1) < 0)
+            perror ("read()");
+    if (tcsetattr(0, TCSADRAIN, &old) < 0)
+            perror ("tcsetattr ~ICANON");
+    return (buf);
 }
 
 void drawScreenBorder();
@@ -664,6 +686,46 @@ void drawArcDown(double cx, double cy, int radius, int r, int g, int b, int a){
 
 }
 
+void *keylistener() {
+    while (1) {
+        char X = getch();
+        if (X == '\033') {
+        	getch();
+        	X = getch();
+
+        	//Right arrow
+        	if (X == 'C') {
+        		//Geser ke kanan
+        		printf("Right\n");
+        	}
+        	//Left arrow
+        	else if (X == 'D') {
+        		//Geser ke kiri
+        		printf("Left\n");
+        	}
+        	//Up arrow
+        	else if (X == 'A') {
+        		//Geser ke atas
+        		printf("Up\n");
+        	}
+        	//Down arrow
+        	else if (X == 'B') {
+        		//Geser ke bawah
+        		printf("Down\n");
+        	}
+            
+        } else if ((X == 'i') || (X == 'I')) {
+        	//Zoom in
+        	printf("Zoom in\n");
+        } else if ((X == 'o') || (X == 'O')) {
+        	//Zoom out
+        	printf("Zoom out\n");
+        } else if ((X == 'x') || (X == 'X')) {
+        	exit(0);
+        }
+    }
+}
+
 // --------------------------------------------------------------------------------------------------------- //
 
 int main(int argc, char *argv[]) {
@@ -683,12 +745,16 @@ int main(int argc, char *argv[]) {
     fillPolyline(&p, 0,255,0,0);
 
     int i;
+    pthread_t listener;
+    pthread_create(&listener, NULL, keylistener, NULL);
 
     for(i=0; i<50; i++) {
       usleep(1000000);
       scalePolyline(&p,p.xp,p.yp,2.0);
       fillPolyline(&p, 0,255,0,0);
     }
+
+    
 
     terminate();
     return 0;
