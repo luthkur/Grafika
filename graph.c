@@ -627,32 +627,7 @@ void floodFill(int x,int y, int r,int g,int b,int a, int rb,int gb,int bb,int ab
 
 }
 
-void drawScreenBorder() {
-	
-	PolyLine p;
-	initPolyline(&p,0,0,255,0);
-	addEndPoint(&p, borderwidth,borderwidth);
-	addEndPoint(&p, borderwidth,vinfo.yres-borderwidth);
-	addEndPoint(&p, vinfo.xres-borderwidth,vinfo.yres-borderwidth);
-	addEndPoint(&p, vinfo.xres-borderwidth,borderwidth);
-	drawPolylineOutline(&p);
-  
-  // loop method untuk mendemonstarsikan menulis border berbagai ukuran
-  // hanya jalan jika isOverflow menggunakan metode seperti di graph.c
-  /*
-  PolyLine p[11];
-  for(int i = 1; i < 10; i++)
-  {
-    initPolyline(&p[i],255,0,0,0);
-    addEndPoint(&p[i], xmiddle-borderx*i,ymiddle-bordery*i);
-    addEndPoint(&p[i], xmiddle+borderx*i,ymiddle-bordery*i);
-    addEndPoint(&p[i], xmiddle+borderx*i,ymiddle+bordery*i);
-    addEndPoint(&p[i], xmiddle-borderx*i,ymiddle+bordery*i);
-    drawPolylineOutline(&p[i]);
-  }
-  */
-  
-}
+
 
 
 // STRUKTUR DATA DAN METODE PENGGAMBARAN POLYLINE----------------------------------------------------------- //
@@ -812,6 +787,33 @@ void rotatePolyline(PolyLine* p, int xr, int yr, double degrees) {
 	}
 
 	drawPolylineOutline(p);
+}
+
+void drawScreenBorder() {
+	
+	PolyLine p;
+	initPolyline(&p,0,0,255,0);
+	addEndPoint(&p, borderwidth,borderwidth);
+	addEndPoint(&p, borderwidth,vinfo.yres-borderwidth);
+	addEndPoint(&p, vinfo.xres-borderwidth,vinfo.yres-borderwidth);
+	addEndPoint(&p, vinfo.xres-borderwidth,borderwidth);
+	drawPolylineOutline(&p);
+  
+  // loop method untuk mendemonstarsikan menulis border berbagai ukuran
+  // hanya jalan jika isOverflow menggunakan metode seperti di graph.c
+  /*
+  PolyLine p[11];
+  for(int i = 1; i < 10; i++)
+  {
+    initPolyline(&p[i],255,0,0,0);
+    addEndPoint(&p[i], xmiddle-borderx*i,ymiddle-bordery*i);
+    addEndPoint(&p[i], xmiddle+borderx*i,ymiddle-bordery*i);
+    addEndPoint(&p[i], xmiddle+borderx*i,ymiddle+bordery*i);
+    addEndPoint(&p[i], xmiddle-borderx*i,ymiddle+bordery*i);
+    drawPolylineOutline(&p[i]);
+  }
+  */
+  
 }
 
 
