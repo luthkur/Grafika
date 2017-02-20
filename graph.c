@@ -292,9 +292,82 @@ int drawLine(Line* l) {
 	if(isOverflow((*l).x1, (*l).y1) && isOverflow((*l).x2, (*l).y2)) {
 		return 0; // Do Nothing if both of the endPoint overflowed
 		
-	} else if(isOverflow((*l).x1, (*l).y1) || isOverflow((*l).x2, (*l).y2)) {
+	}
+	else if(isOverflow((*l).x1, (*l).y1) || isOverflow((*l).x2, (*l).y2)) {
 		// If one of the endPoint overflowed
-		return 0;
+		// Memastikan x1 < x2
+		if((*l).x1 > (*l).x2) {
+			int x,y;
+			x = (*l).x1;
+			y = (*l).y1;
+			(*l).x1 = (*l).x2;
+			(*l).y1 = (*l).y2;
+			(*l).x2 = x;
+			(*l).y2 = y;
+		}
+
+
+		int xlow = borderwidth-1, xhigh = vinfo.xres-borderwidth;
+		int ylow = borderwidth-1, yhigh = vinfo.yres-borderwidth;
+		int x1 = (*l).x1, y1 = (*l).y1;
+		int x2 = (*l).x2, y2 = (*l).y2;
+		int x, y;
+
+		if (x2 > xhigh) {
+			//printf("%d %d %d %d %d %d %d\n", xhigh, x1, y2, y1, x2, x1, y1);
+			y = ((xhigh - x1) * (y2-y1) / (x2 - x1)) + y1;
+			//printf("aaa %d %d\n", x, y);
+			if (y < ylow) {
+				x = ((ylow - y1) * (x2 - x1) / (y2 - y1)) + x1;
+				y = ylow;
+				//printf("aaa %d %d\n", x, y);
+			} else if (y > yhigh) {
+				x  = ((yhigh - y1) * (x2 - x1) / (y2 - y1)) + x1;
+				y = yhigh;
+				//printf("aaa %d %d\n", x, y);
+			} else {
+				x = xhigh;
+				//printf("aaa %d %d\n", x, y);
+			}
+			(*l).x2 = x;
+			(*l).y2 = y;
+			//printf("aaa %d %d\n", x, y);
+			return drawLine(l);
+		} else if (x1 < xlow) {
+			y = ((xlow - x1) * (y2-y1) / (x2 - x1)) + y1;
+			if (y < ylow) {
+				x  = ((ylow - y1) * (x2 - x1) / (y2 - y1)) + x1;
+				y = ylow;
+			} else if (y > yhigh) {
+				x  = ((yhigh - y1) * (x2 - x1) / (y2 - y1)) + x1;
+				y = yhigh;
+			} else {
+				x = xlow;
+			}
+			(*l).x1 = x;
+			(*l).y1 = y;
+			//printf("bbb %d %d\n", x, y);
+			return drawLine(l);
+		} else {
+			if ((y1 < ylow) || (y2 < ylow)) {
+				y = ylow;
+				x  = ((ylow - y1) * (x2 - x1) / (y2 - y1)) + x1;
+			} else if ((y2 > yhigh) || (y1 > yhigh)) {
+				y = yhigh;
+				x  = ((yhigh - y1) * (x2 - x1) / (y2 - y1)) + x1;
+			}
+
+			if ((y1 < ylow) || (y1 > yhigh)) {
+				(*l).x1 = x;
+				(*l).y1 = y;
+			} else if ((y2 < ylow) || (y2 > yhigh)) {
+				(*l).x2 = x;
+				(*l).y2 = y;
+			}
+			//printf("ccc %d %d\n", x, y);
+			return drawLine(l);
+		}
+	//	return 0;
 	}
 	
 	int col = 0;
@@ -798,6 +871,7 @@ void drawScreenBorder() {
 	addEndPoint(&p, vinfo.xres-borderwidth,vinfo.yres-borderwidth);
 	addEndPoint(&p, vinfo.xres-borderwidth,borderwidth);
 	drawPolylineOutline(&p);
+	borderwidth+=2;
   
   // loop method untuk mendemonstarsikan menulis border berbagai ukuran
   // hanya jalan jika isOverflow menggunakan metode seperti di graph.c
@@ -1854,17 +1928,6 @@ void* pilotFall() {
 
 int main(int argc, char *argv[]) {
 
-	// struct PlaneData AddPlaneData;
-	// AddPlaneData.xpos = atoi(argv[1]);
-	// AddPlaneData.ypos = atoi(argv[2]);
-	// AddPlaneData.size = atoi(argv[3]);
-	// printf("xposition : %d\n", AddPlaneData.xpos);
-	// printf("yposition : %d\n", AddPlaneData.ypos);
-	// printf("size constan : %d\n", AddPlaneData.size);
-
- //    initScreen();
- //    clearScreen();
-
 	struct PlaneData AddPlaneData;
   struct downersize;
 	AddPlaneData.xpos = atoi(argv[1]);
@@ -1873,11 +1936,12 @@ int main(int argc, char *argv[]) {
 	printf("xposition : %d\n", AddPlaneData.xpos);
 	printf("yposition : %d\n", AddPlaneData.ypos);
 	printf("size constan : %d\n", AddPlaneData.size);
-    initScreen();
-    clearScreen();
-    
-    max_y_point = vinfo.yres / 4;
+	    max_y_point = vinfo.yres / 4;
     printf("max_y_point: %d\n", max_y_point);
+   initScreen();
+   clearScreen();
+    
+
     
 	pthread_t planeThread, turretThread, ioThread,rotorThread;
 	pthread_create(&planeThread,NULL,startPlane,(void *) &AddPlaneData);
@@ -1886,58 +1950,15 @@ int main(int argc, char *argv[]) {
 
 	pthread_t pilot;
 	pthread_create(&pilot, NULL, pilotFall, NULL);
-  //pthread_create(&rotorThread,NULL,drawPropeller,(void *) &AddPlaneData);
 
-	// pthread_t planeThread, turretThread, ioThread;
-	// pthread_create(&planeThread,NULL,startPlane,(void *) &AddPlaneData);
-	// pthread_create(&turretThread,NULL,turretHandler,NULL);
-	// pthread_create(&ioThread,NULL,ioHandler,NULL);
-
-	// pthread_join(turretThread, NULL);
-	// pthread_join(ioThread, NULL);
-	// pthread_join(planeThread, NULL);
-	// terminate();
-  
-    // initScreen();
-    // clearScreen();
-  //pthread_join(rotorThread, NULL);
-
-
-  /*
-  initScreen();
-  clearScreen();
-  */
-
-	// PolyLine p;
-	// initPolyline(&p, 255,0,0,0);
-	// addEndPoint(&p, 200,150);
-	// addEndPoint(&p, 200,200);
-	// addEndPoint(&p, 150,200);
-	// addEndPoint(&p, 150,150);
-	//
-	// setFirePoint(&p, 175, 175);
-	// drawPolylineOutline(&p);
-	// fillPolyline(&p, 0,255,0,0);
-	//
-	// int i;
-	// for(i=0; i<50; i++) {
-	// 	usleep(100000);
-	// 	rotatePolyline(&p,p.xp,p.yp,10);
-	// 	movePolyline(&p,10,0);
-	// 	fillPolyline(&p, 0,255,0,0);
-	// }
-  //drawParachute(200,200);
-  //drawPassenger(200,200);
-  //   drawPilot(200,200,1, 10);
-  //   usleep(1000000);
-  //   drawPilot(200,200,0, 10);
-  // //drawPropeller(200,200,4);
-  //   pilotFall(800,500);
-  //drawPassenger(200,200);
 	pthread_join(turretThread, NULL);
 	pthread_join(ioThread, NULL);
 	pthread_join(planeThread, NULL);
 	pthread_join(pilot, NULL);
 	terminate();
     return 0;
+
+
+	
+	return 0;
  }
