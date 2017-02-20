@@ -30,10 +30,11 @@ void *turretHandler(void *);		// The thread that handle the turret and its direc
 void *ioHandler(void *);			// The thread that handle the bullet shooting
 
 int xcrash=800, ycrash =500;
-//int xcrash=0, ycrash=0;
 
 int max_y_point;
 int less_than_maxy = 0;
+
+int borderwidth = 25;               // The border width, distance from the actual screenBorder
 
 
 // UTILITY PROCEDURE----------------------------------------------------------------------------------------- //
@@ -41,7 +42,7 @@ int less_than_maxy = 0;
 int isOverflow(int _x , int _y) {
 //Cek apakah kooordinat (x,y) sudah melewati batas layar
     int result;
-    if ( _x > vinfo.xres ||  _y > vinfo.yres -20 ) {
+    if ( _x > vinfo.xres-borderwidth || _y > vinfo.yres-borderwidth || _x < borderwidth-1 || _y < borderwidth-1 ) {
         result = 1;
     }
     else {
@@ -56,6 +57,7 @@ void terminate() {
      close(fbfd);
 }
 
+void drawScreenBorder();
 
 // STRUKTUR DATA BLOCK CHARACTER---------------------------------------------------------------------------- //
 
@@ -151,6 +153,12 @@ void initScreen() {
          perror("Error: failed to map framebuffer device to memory");
          exit(4);
      }
+	 
+	 if (!vinfo.bits_per_pixel == 32) {
+		perror("bpp NOT SUPPORTED");
+		exit(4);
+	 }
+	 
      printf("The framebuffer device was mapped to memory successfully.\n");
 
 }
@@ -161,15 +169,12 @@ void clearScreen() {
     int y = 0;
     for (y = 0; y < vinfo.yres - 150 ;y++) {
 		for (x = 0; x < vinfo.xres ; x++) {
-			if (vinfo.bits_per_pixel == 32) {
+			
                 plotPixelRGBA(x,y,0,0,0,0);
-            } else  { //asumsi mode 16 bit per piksel
-				perror("bpp NOT SUPPORTED");
-				exit(0);
-            }
 
         }
 	}
+	drawScreenBorder();
 }
 
 
@@ -283,6 +288,15 @@ void initLine(Line* l, int xa, int ya, int xb, int yb, int rx, int gx, int bx, i
 }
 
 int drawLine(Line* l) {
+	
+	if(isOverflow((*l).x1, (*l).y1) && isOverflow((*l).x2, (*l).y2)) {
+		return 0; // Do Nothing if both of the endPoint overflowed
+		
+	} else if(isOverflow((*l).x1, (*l).y1) || isOverflow((*l).x2, (*l).y2)) {
+		// If one of the endPoint overflowed
+		return 0;
+	}
+	
 	int col = 0;
 
 	// Coord. of the next point to be displayed
@@ -597,9 +611,9 @@ int animateLine(Line* l, int delay, int length) {
 void floodFill(int x,int y, int r,int g,int b,int a, int rb,int gb,int bb,int ab) {
 // rgba is the color of the fill, rbgbbbab is the color of the border
 
-	if(!isPixelColor(x,y, r,g,b,a)) {
-		if(!isPixelColor(x,y, rb,gb,bb,ab)) {
-			if((!isOverflow(x,y)) ) {
+	if((!isOverflow(x,y)) ) {
+		if(!isPixelColor(x,y, r,g,b,a)) {
+			if(!isPixelColor(x,y, rb,gb,bb,ab)) {
 
 				plotPixelRGBA(x,y, r,g,b,a);
 				floodFill(x+1,y, r,g,b,a, rb,gb,bb,ab);
@@ -611,6 +625,33 @@ void floodFill(int x,int y, int r,int g,int b,int a, int rb,int gb,int bb,int ab
 		}
 	}
 
+}
+
+void drawScreenBorder() {
+	
+	PolyLine p;
+	initPolyline(&p,0,0,255,0);
+	addEndPoint(&p, borderwidth,borderwidth);
+	addEndPoint(&p, borderwidth,vinfo.yres-borderwidth);
+	addEndPoint(&p, vinfo.xres-borderwidth,vinfo.yres-borderwidth);
+	addEndPoint(&p, vinfo.xres-borderwidth,borderwidth);
+	drawPolylineOutline(&p);
+  
+  // loop method untuk mendemonstarsikan menulis border berbagai ukuran
+  // hanya jalan jika isOverflow menggunakan metode seperti di graph.c
+  /*
+  PolyLine p[11];
+  for(int i = 1; i < 10; i++)
+  {
+    initPolyline(&p[i],255,0,0,0);
+    addEndPoint(&p[i], xmiddle-borderx*i,ymiddle-bordery*i);
+    addEndPoint(&p[i], xmiddle+borderx*i,ymiddle-bordery*i);
+    addEndPoint(&p[i], xmiddle+borderx*i,ymiddle+bordery*i);
+    addEndPoint(&p[i], xmiddle-borderx*i,ymiddle+bordery*i);
+    drawPolylineOutline(&p[i]);
+  }
+  */
+  
 }
 
 
