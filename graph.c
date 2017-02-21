@@ -911,6 +911,9 @@ void *startPlane(void *threadarg) {
   int iii = 10;
   int x = xpos +size*6;
   int y = ypos -size*2;
+  PolyLine p;
+  
+  while (planeCrash==0){
 	x_depan = xpos-size*2;
 	x_belakang = xpos+size*6;
 
@@ -948,7 +951,7 @@ void *startPlane(void *threadarg) {
 	setFirePoint(&plane5, xpos+size*5, ypos-size*2);
 
   int scale = size/3;
-  PolyLine p;
+  
     initPolyline(&p, rplane,gplane,gplane,aplane);
     setFirePoint(&p, x,y);
     addEndPoint(&p,x-(scale),y);
@@ -1030,7 +1033,8 @@ void *startPlane(void *threadarg) {
 		
 		//printf("not crash\n");
 		
-    }
+      }
+	}
     
 	
 	if(planeCrash==0) planeCrash=1;
