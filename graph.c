@@ -7,6 +7,7 @@
 #include <sys/ioctl.h>
 #include <time.h>
 #include <math.h>
+#include <termios.h>
 
 #define rplane 255
 #define gplane 20
@@ -34,7 +35,10 @@ int xcrash=800, ycrash =500;
 int max_y_point;
 int less_than_maxy = 0;
 
-int borderwidth = 25;               // The border width, distance from the actual screenBorder
+int borderwidthu = 100;               // The border width, distance from the actual screenBorder
+int borderwidthd = 100;               // The border width, distance from the actual screenBorder
+int borderwidthl = 100;               // The border width, distance from the actual screenBorder
+int borderwidthr = 100;               // The border width, distance from the actual screenBorder
 
 
 // UTILITY PROCEDURE----------------------------------------------------------------------------------------- //
@@ -42,7 +46,7 @@ int borderwidth = 25;               // The border width, distance from the actua
 int isOverflow(int _x , int _y) {
 //Cek apakah kooordinat (x,y) sudah melewati batas layar
     int result;
-    if ( _x > vinfo.xres-borderwidth || _y > vinfo.yres-borderwidth || _x < borderwidth-1 || _y < borderwidth-1 ) {
+    if ( _x > vinfo.xres-borderwidthd || _y > vinfo.yres-borderwidthr || _x < borderwidthu-1 || _y < borderwidthl-1 ) {
         result = 1;
     }
     else {
@@ -55,6 +59,27 @@ void terminate() {
 	//Pengakhiran program.
      munmap(fbp, screensize);
      close(fbfd);
+}
+
+//read char without print
+char getch() {
+    char buf = 0;
+    struct termios old = {0};
+    struct termios new = {0};
+    if (tcgetattr(0, &old) < 0)
+            perror("tcsetattr()");
+    new = old;
+    new.c_lflag &= ~ICANON;
+    new.c_lflag &= ~ECHO;
+    new.c_cc[VMIN] = 1;
+    new.c_cc[VTIME] = 0;
+    if (tcsetattr(0, TCSANOW, &new) < 0)
+            perror("tcsetattr ICANON");
+    if (read(0, &buf, 1) < 0)
+            perror ("read()");
+    if (tcsetattr(0, TCSADRAIN, &old) < 0)
+            perror ("tcsetattr ~ICANON");
+    return (buf);
 }
 
 void drawScreenBorder();
@@ -165,6 +190,7 @@ void initScreen() {
 
 void clearScreen() {
 //Mewarnai latar belakang screen dengan warna putih
+	system("clear");
     int x = 0;
     int y = 0;
     for (y = 0; y < vinfo.yres - 150 ;y++) {
@@ -307,8 +333,8 @@ int drawLine(Line* l) {
 		}
 
 
-		int xlow = borderwidth-1, xhigh = vinfo.xres-borderwidth;
-		int ylow = borderwidth-1, yhigh = vinfo.yres-borderwidth;
+		int xlow = borderwidthu-1, xhigh = vinfo.xres-borderwidthd;
+		int ylow = borderwidthl-1, yhigh = vinfo.yres-borderwidthr;
 		int x1 = (*l).x1, y1 = (*l).y1;
 		int x2 = (*l).x2, y2 = (*l).y2;
 		int x, y;
@@ -866,12 +892,15 @@ void drawScreenBorder() {
 	
 	PolyLine p;
 	initPolyline(&p,0,0,255,0);
-	addEndPoint(&p, borderwidth,borderwidth);
-	addEndPoint(&p, borderwidth,vinfo.yres-borderwidth);
-	addEndPoint(&p, vinfo.xres-borderwidth,vinfo.yres-borderwidth);
-	addEndPoint(&p, vinfo.xres-borderwidth,borderwidth);
+	addEndPoint(&p, borderwidthd,borderwidthl);
+	addEndPoint(&p, borderwidthd,vinfo.yres-borderwidthr);
+	addEndPoint(&p, vinfo.xres-borderwidthu,vinfo.yres-borderwidthr);
+	addEndPoint(&p, vinfo.xres-borderwidthu,borderwidthl);
 	drawPolylineOutline(&p);
-	borderwidth+=2;
+	// borderwidthd+=2;
+	// borderwidthu+=2;
+	// borderwidthl+=2;
+	// borderwidthr+=2;
   
   // loop method untuk mendemonstarsikan menulis border berbagai ukuran
   // hanya jalan jika isOverflow menggunakan metode seperti di graph.c
@@ -1038,6 +1067,11 @@ void *startPlane(void *threadarg) {
     
 	
 	if(planeCrash==0) planeCrash=1;
+	borderwidthu += 250;
+	borderwidthd += 150;
+	borderwidthl += 250;
+	borderwidthr += 250;
+	clearScreen();
     deletePolyline(&p);
     iii = 60;
     int ii = 0;
@@ -1928,6 +1962,59 @@ void* pilotFall() {
 }
 
 
+void *keylistener() {
+    while (1) {
+        char X = getch();
+        if (X == '\033') {
+        	getch();
+        	X = getch();
+
+        	//Right arrow
+        	if (X == 'C') {
+        		//Geser ke kanan
+        		//printf("Right\n");
+        		borderwidthd += 50;
+        		borderwidthu -= 50;
+        		clearScreen();
+        	}
+        	//Left arrow
+        	else if (X == 'D') {
+        		//Geser ke kiri
+        		borderwidthd -= 50;
+        		borderwidthu += 50;
+        		clearScreen();
+        		//printf("Left\n");
+        	}
+        	//Up arrow
+        	else if (X == 'A') {
+        		//Geser ke atas
+        		borderwidthl -= 50;
+        		borderwidthr += 50;
+        		clearScreen();
+        		//printf("Up\n");
+        	}
+        	//Down arrow
+        	else if (X == 'B') {
+        		//Geser ke bawah
+        		borderwidthr -= 50;
+        		borderwidthl += 50;
+        		clearScreen();
+        		//printf("Down\n");
+        	}
+            
+        } else if ((X == 'i') || (X == 'I')) {
+        	//Zoom in
+        	//printf("Zoom in\n");
+        } else if ((X == 'o') || (X == 'O')) {
+        	//Zoom out
+        	//printf("Zoom out\n");
+        } else if ((X == 'x') || (X == 'X')) {
+        	exit(0);
+        }
+    }
+}
+
+
 //------//
 
 int main(int argc, char *argv[]) {
@@ -1954,6 +2041,9 @@ int main(int argc, char *argv[]) {
 
 	pthread_t pilot;
 	pthread_create(&pilot, NULL, pilotFall, NULL);
+
+	pthread_t listener;
+    pthread_create(&listener, NULL, keylistener, NULL);
 
 	pthread_join(turretThread, NULL);
 	pthread_join(ioThread, NULL);
