@@ -65,44 +65,6 @@ char getch() {
 
 void drawScreenBorder();
 
-// STRUKTUR DATA BLOCK CHARACTER---------------------------------------------------------------------------- //
-
-typedef struct {
-	int *array;
-	size_t used;
-	size_t size;
-	int x;
-	int y;
-} Block;
-
-void initArray(Block *a, size_t initialSize) {
-  a->array = (int *)malloc(initialSize * sizeof(int));
-  a->used = 0;
-  a->size = initialSize;
-}
-
-void insertArray(Block *a, int element) {
-  // a->used is the number of used entries, because a->array[a->used++] updates a->used only *after* the array has been accessed.
-  // Therefore a->used can go up to a->size
-  if (a->used == a->size) {
-    a->size *= 2;
-    a->array = (int *)realloc(a->array, a->size * sizeof(int));
-  }
-  a->array[a->used++] = element;
-}
-
-void freeArray(Block *a) {
-  free(a->array);
-  a->array = NULL;
-  a->used = a->size = 0;
-}
-
-void setCoordinate(Block *a , int _x , int _y){
-    a->x = _x;
-    a->y = _y;
-}
-
-
 // PROSEDUR RESET LAYAR DAN PEWARNAAN PIXEL----------------------------------------------------------------- //
 
 int plotPixelRGBA(int _x, int _y, int r, int g, int b, int a) {
@@ -184,97 +146,6 @@ void clearScreen() {
 	}
 	drawScreenBorder();
 	
-}
-
-
-// PROSEDUR PENGGAMBARAN BLOK CHARACTER--------------------------------------------------------------------- //
-
-void initBlock(char* blockfile, Block* blockmem, int _x, int _y) {
-	//Membaca file block character kedalam memori, tempatkan di koordinaat (x,y) layar
-
-    FILE * inputFile;
-    int pix;
-    char see;
-    int stop = 0;
-
-    initArray(blockmem, 5);
-    inputFile = fopen(blockfile,"r");
-    (*blockmem).x = _x;
-    (*blockmem).y = _y;
-
-    while (!stop) {
-        fscanf(inputFile, "%d", &pix);
-        insertArray(blockmem, pix);
-        //printf("%d ", pix);
-        see = getc(inputFile);
-        //printf("isee : %d \n", see );
-         if (see == 13) {
-            insertArray(blockmem, -1);
-            //printf("\n");
-         }
-         else if( see == EOF) {
-            stop = 1;
-         }
-    }
-}
-
-void drawBlock(Block* blockmem) {
-//Menggambar block character pada layar
-
-    int i;
-    int xCanvas = blockmem->x;
-    int yCanvas = blockmem->y;
-    int pix;
-    for (i =0 ; i < (*blockmem).used ; i++) {
-        pix = (*blockmem).array[i];
-        if ( pix == -1 ) {
-            xCanvas = blockmem->x;
-            yCanvas++;
-        }
-        else {
-            if (!isOverflow(xCanvas,yCanvas)){
-                plotPixelRGBA(xCanvas,yCanvas,pix,pix,pix,0);
-            }
-        }
-        xCanvas++;
-    }
-
-}
-
-void removeBlock(Block* blockmem) {
-//Menghapus block character pada layar
-
-    int i;
-    int xCanvas = blockmem->x;
-    int yCanvas = blockmem->y;
-    int pix;
-    for (i =0 ; i < (*blockmem).used ; i++) {
-        pix = (*blockmem).array[i];
-        if ( pix == -1 ) {
-            xCanvas =  blockmem->x;
-            yCanvas++;
-        }
-        else {
-            if (!isOverflow(xCanvas,yCanvas)){
-                plotPixelRGBA(xCanvas,yCanvas,255,255,255,0);
-            }
-        }
-        xCanvas++;
-    }
-}
-
-void moveUp(Block* blockmem, int px) {
-//Animasi gerak ke atas sebesar x pixel
-
-    int j = blockmem -> y;
-    int initPx = j;
-    for (j ; j > initPx - px ; j = j - 4){
-        setCoordinate(blockmem , blockmem->x , j);
-        drawBlock(blockmem);
-        usleep(5000);
-        removeBlock(blockmem);
-    }
-    drawBlock(blockmem);
 }
 
 
@@ -443,6 +314,16 @@ void setFirePoint(PolyLine* p, int x, int y) {
 	(*p).yp = y;
 }
 
+void boxPolyline(PolyLine* p, int x1, int y1, int x2, int y2) {
+	addEndPoint(p, x1, y1);
+	addEndPoint(p, x1, y2);
+	addEndPoint(p, x2, y2);
+	addEndPoint(p, x2, y1);
+	int xp = (x1+x2)/2;
+	int yp = (y1+y2)/2;
+	setFirePoint(p, xp, yp);
+}
+
 int drawPolylineOutline(PolyLine* p) {
 	int col = 0;
 	int i; Line l;
@@ -469,21 +350,6 @@ void drawScreenBorder() {
 	addEndPoint(&p, vinfo.xres-borderwidth,vinfo.yres-borderwidth);
 	addEndPoint(&p, vinfo.xres-borderwidth,borderwidth);
 	drawPolylineOutline(&p);
-  
-  // loop method untuk mendemonstarsikan menulis border berbagai ukuran
-  // hanya jalan jika isOverflow menggunakan metode seperti di graph.c
-  /*
-  PolyLine p[11];
-  for(int i = 1; i < 10; i++)
-  {
-    initPolyline(&p[i],255,0,0,0);
-    addEndPoint(&p[i], xmiddle-borderx*i,ymiddle-bordery*i);
-    addEndPoint(&p[i], xmiddle+borderx*i,ymiddle-bordery*i);
-    addEndPoint(&p[i], xmiddle+borderx*i,ymiddle+bordery*i);
-    addEndPoint(&p[i], xmiddle-borderx*i,ymiddle+bordery*i);
-    drawPolylineOutline(&p[i]);
-  }
-  */
   
 }
 
@@ -728,33 +594,340 @@ void *keylistener() {
 
 // --------------------------------------------------------------------------------------------------------- //
 
+typedef struct {
+
+	PolyLine* arr;
+	int PolyCount;
+
+} PolyLineArray;
+
+void initPolyLineArray(PolyLineArray* p, int size) {
+	(*p).arr = (PolyLine *)malloc(size * sizeof(PolyLine));
+	(*p).PolyCount = 0;
+}
+
+void addPolyline(PolyLineArray* parr, PolyLine* p) {
+
+	PolyLine* temp = &((*parr).arr[(*parr).PolyCount]);
+	(*temp).xp = (*p).xp;
+	(*temp).yp = (*p).yp;
+	(*temp).PointCount = (*p).PointCount;
+	
+	(*temp).r = (*p).r;
+	(*temp).g = (*p).g;
+	(*temp).b = (*p).b;
+	(*temp).a = (*p).a;
+	
+	int i;
+	for(i=0; i<(*p).PointCount; i++) {
+		(*temp).x[i] = (*p).x[i];
+		(*temp).y[i] = (*p).y[i];
+	}
+	
+	(*parr).PolyCount++;
+
+}
+
+void createBangunanArr(PolyLineArray* parr) {
+	int br = 255; int bg = 0; int bb = 0; int ba = 0;
+	
+	initPolyLineArray(parr,100);
+	
+	PolyLine p;
+	
+	// Zone 14
+	{
+	initPolyline(&p, br,bg,bb,ba);
+	addEndPoint(&p, 85, 65);
+	addEndPoint(&p, 147, 65);
+	addEndPoint(&p, 140, 40);
+	addEndPoint(&p, 166, 40);
+	addEndPoint(&p, 159, 65);
+	addEndPoint(&p, 170, 65);
+	addEndPoint(&p, 170, 81);
+	addEndPoint(&p, 85, 81);
+    setFirePoint(&p, 130, 75);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 87,104, 170,91);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	addEndPoint(&p, 70, 107);
+	addEndPoint(&p, 150, 107);
+	addEndPoint(&p, 150, 125);
+	addEndPoint(&p, 136, 139);
+	addEndPoint(&p, 136, 156);
+	addEndPoint(&p, 87, 156);
+	addEndPoint(&p, 87, 125);
+	addEndPoint(&p, 70, 124);
+	setFirePoint(&p, 107, 133);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 61,131, 87,147);
+	addPolyline(parr,&p);
+}
+
+	// Zone 13
+	{
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 81,163, 126,188);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 54,193, 137,239);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 54,239, 98,266);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 54,266, 98,293);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 98,273, 114,287);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 114,266, 132,293);
+	addPolyline(parr,&p);
+}
+
+	// Zone 12
+	{
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 154,162, 217,199);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 154,208, 217,244);
+	addPolyline(parr,&p);
+}
+
+	// Zone 15
+	{
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 197,80, 246,130);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	addEndPoint(&p, 292,129);
+	addEndPoint(&p, 250, 129);
+	addEndPoint(&p, 250, 72);
+	addEndPoint(&p, 242, 72);
+	addEndPoint(&p, 242, 55);
+	addEndPoint(&p, 292, 55);
+	setFirePoint(&p, 271, 90);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	addEndPoint(&p, 341, 115);
+	addEndPoint(&p, 350, 125);
+	addEndPoint(&p, 381, 125);
+	addEndPoint(&p, 390, 118);
+	addEndPoint(&p, 390, 87);
+	addEndPoint(&p, 375, 63);
+	addEndPoint(&p, 346, 63);
+	addEndPoint(&p, 335, 69);
+	addEndPoint(&p, 335, 99);
+	addEndPoint(&p, 341, 99);
+	setFirePoint(&p, 362, 95);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	addEndPoint(&p, 398, 58);
+	addEndPoint(&p, 455, 58);
+	addEndPoint(&p, 455, 123);
+	addEndPoint(&p, 446, 123);
+	addEndPoint(&p, 446, 134);
+	addEndPoint(&p, 398, 134);
+	setFirePoint(&p, 426, 98);
+	addPolyline(parr,&p);
+}
+
+	// Zone 11
+	{
+	initPolyline(&p, br,bg,bb,ba);
+	addEndPoint(&p, 274, 153);
+	addEndPoint(&p, 249, 176);
+	addEndPoint(&p, 274, 200);
+	addEndPoint(&p, 300, 176);
+	setFirePoint(&p, 274, 176);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	addEndPoint(&p, 274, 208);
+	addEndPoint(&p, 249, 231);
+	addEndPoint(&p, 274, 255);
+	addEndPoint(&p, 300, 231);
+	setFirePoint(&p, 274, 231);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	addEndPoint(&p, 384, 195);
+	addEndPoint(&p, 384, 170);
+	addEndPoint(&p, 328, 170);
+	addEndPoint(&p, 328, 183);
+	addEndPoint(&p, 344, 195);
+	setFirePoint(&p, 360, 184);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	addEndPoint(&p, 384, 213);
+	addEndPoint(&p, 384, 238);
+	addEndPoint(&p, 328, 238);
+	addEndPoint(&p, 328, 224);
+	addEndPoint(&p, 344, 213);
+	setFirePoint(&p, 274, 231);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 392,163, 432,239);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 432,239, 391,273);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 391,273, 354,246);
+	addPolyline(parr,&p);
+}
+
+	// Zone 10
+	{
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 184,299, 303,327);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 184,344, 303,375);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 321,299, 442,329);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 321,346, 442,375);
+	addPolyline(parr,&p);
+}
+
+	// Zona 9
+	{
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 113,362, 174,385);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 90,356, 51,337);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	addEndPoint(&p, 101, 317);
+	addEndPoint(&p, 101, 338);
+	addEndPoint(&p, 112, 351);
+	addEndPoint(&p, 132, 351);
+	addEndPoint(&p, 145, 338);
+	addEndPoint(&p, 145, 317);
+	addEndPoint(&p, 132, 305);
+	addEndPoint(&p, 112, 305);
+	setFirePoint(&p, 118, 330);
+	addPolyline(parr,&p);
+}
+
+	// Zone 16
+	{
+	initPolyline(&p, br,bg,bb,ba);
+	addEndPoint(&p, 489, 41);
+	addEndPoint(&p, 490, 22);
+	addEndPoint(&p, 523, 25);
+	addEndPoint(&p, 523, 45);
+	setFirePoint(&p, 504, 33);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	addEndPoint(&p, 486, 46);
+	addEndPoint(&p, 484, 78);
+	addEndPoint(&p, 467, 77);
+	addEndPoint(&p, 467, 45);
+	setFirePoint(&p, 504, 33);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	addEndPoint(&p, 492, 45);
+	addEndPoint(&p, 516, 46);
+	addEndPoint(&p, 515, 82);
+	addEndPoint(&p, 491, 79);
+	setFirePoint(&p, 504, 64);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	addEndPoint(&p, 468, 97);
+	addEndPoint(&p, 591, 107);
+	addEndPoint(&p, 588, 134);
+	addEndPoint(&p, 568, 133);
+	addEndPoint(&p, 570, 123);
+	addEndPoint(&p, 467, 113);
+	setFirePoint(&p, 526, 110);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	addEndPoint(&p, 528, 128);
+	addEndPoint(&p, 524, 172);
+	addEndPoint(&p, 503, 170);
+	addEndPoint(&p, 507, 126);
+	setFirePoint(&p, 516, 150);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	addEndPoint(&p, 475, 176);
+	addEndPoint(&p, 568, 184);
+	addEndPoint(&p, 571, 144);
+	addEndPoint(&p, 583, 145);
+	addEndPoint(&p, 577, 198);
+	addEndPoint(&p, 474, 189);
+	setFirePoint(&p, 525, 187);
+	addPolyline(parr,&p);
+
+	initPolyline(&p, br,bg,bb,ba);
+	addEndPoint(&p, 475, 198);
+	addEndPoint(&p, 557, 206);
+	addEndPoint(&p, 555, 232);
+	addEndPoint(&p, 474, 223);
+	setFirePoint(&p, 516, 216);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	addEndPoint(&p, 473, 236);
+	addEndPoint(&p, 565, 245);
+	addEndPoint(&p, 563, 268);
+	addEndPoint(&p, 471, 258);
+	setFirePoint(&p, 517, 252);
+	addPolyline(parr,&p);
+}
+	
+}
+
+void drawPolylineArrayOutline(PolyLineArray* parr) {
+	int i;
+	for(i=0; i<(*parr).PolyCount;i++) {
+		drawPolylineOutline(&((*parr).arr[i]));
+	}
+}
+
 int main(int argc, char *argv[]) {
     
     initScreen();
     clearScreen();
     
-	PolyLine p;
-    initPolyline(&p, 255,0,0,0);
-    addEndPoint(&p, xmiddle-5,ymiddle-5);
-    addEndPoint(&p, xmiddle+5,ymiddle-5);
-    addEndPoint(&p, xmiddle+5,ymiddle+5);
-    addEndPoint(&p, xmiddle-5,ymiddle+5);
-    setFirePoint(&p, xmiddle, ymiddle);
-    drawPolylineOutline(&p);
-
-    fillPolyline(&p, 0,255,0,0);
-
-    int i;
-    pthread_t listener;
-    pthread_create(&listener, NULL, keylistener, NULL);
-
-    for(i=0; i<50; i++) {
-      usleep(1000000);
-      scalePolyline(&p,p.xp,p.yp,2.0);
-      fillPolyline(&p, 0,255,0,0);
-    }
-
-    
+    PolyLineArray bangunan;
+    createBangunanArr(&bangunan);
+    drawPolylineArrayOutline(&bangunan);
 
     terminate();
     return 0;
