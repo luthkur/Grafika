@@ -15,13 +15,15 @@ struct fb_fix_screeninfo finfo;     // Struct Fixed Screeninfo
 long int screensize = 0;            // Ukuran data framebuffer
 char *fbp = 0;                      // Framebuffer di memori internal
 
-int borderwidthu = 25;               // The border width, distance from the actual screenBorder
-int borderwidthd = 25;               // The border width, distance from the actual screenBorder
-int borderwidthl = 25;               // The border width, distance from the actual screenBorder
-int borderwidthr = 25;               // The border width, distance from the actual screenBorder
+int borderwidthu = 10;               // The border width, distance from the actual screenBorder
+int borderwidthd = 10;               // The border width, distance from the actual screenBorder
+int borderwidthl = 10;               // The border width, distance from the actual screenBorder
+int borderwidthr = 10;               // The border width, distance from the actual screenBorder
 
 int xmiddle;
 int ymiddle;
+
+float scale = 1;
 
 // UTILITY PROCEDURE----------------------------------------------------------------------------------------- //
 int isOverflow(int _x , int _y) {
@@ -126,9 +128,11 @@ void initScreen() {
 		exit(0);
 	 }
 	 
-     xmiddle = vinfo.xres/2;
-     ymiddle = vinfo.yres/2;
-     borderwidthd = vinfo.xres/2.5;
+     xmiddle = 305;
+     ymiddle = 305;
+     //borderwidthd = vinfo.xres/2;
+     borderwidthd = vinfo.xres - (borderwidthu + 600);
+     borderwidthr = vinfo.yres - (borderwidthl + 600);
      // borderwidthr = vinfo.xres/2;
      // borderwidthu = vinfo.xres/2;
      // borderwidthl = vinfo.xres/2;
@@ -1456,6 +1460,142 @@ void scalePolylineArray(PolyLineArray* parr, int ax, int ay, float scale) {
 
 PolyLineArray bangunan;
 PolyLineArray jalan;
+PolyLineArray minibangunan;
+PolyLineArray minijalan;
+
+void drawMiniMapOutline() {
+	PolyLine p;
+	initPolyline(&p,0,0,255,0);
+	addEndPoint(&p, borderwidthu,borderwidthl);
+	addEndPoint(&p, vinfo.xres-borderwidthd,borderwidthl);
+	addEndPoint(&p, vinfo.xres-borderwidthd,vinfo.yres-borderwidthr);
+	addEndPoint(&p, borderwidthu,vinfo.yres-borderwidthr);
+	drawPolylineOutline(&p);
+}
+
+PolyLine po;
+
+void drawMiniMapPointer() {
+	int tempd = borderwidthd;
+	int tempu = borderwidthu;
+	int tempr = borderwidthr;
+	int templ = borderwidthl;
+	borderwidthu = vinfo.xres/2 + 5;
+	borderwidthd = vinfo.xres - (borderwidthu + 300);
+	borderwidthr = vinfo.yres - (borderwidthl + 300);
+	
+
+	int xtemp = xmiddle;
+	int ytemp = ymiddle;
+	xmiddle = borderwidthu + 150;
+	ymiddle = borderwidthl + 150;
+	initPolyline(&po,0,255,0,0);
+	addEndPoint(&po, borderwidthu+1,borderwidthl+1);
+	addEndPoint(&po, vinfo.xres-borderwidthd-1,borderwidthl+1);
+	addEndPoint(&po, vinfo.xres-borderwidthd-1,vinfo.yres-borderwidthr-1);
+	addEndPoint(&po, borderwidthu+1,vinfo.yres-borderwidthr-1);
+	setFirePoint(&po, xmiddle, ymiddle);
+	drawPolylineOutline(&po);
+
+	borderwidthd = tempd;
+	borderwidthr = tempr;
+	borderwidthu = tempu;
+	borderwidthl = templ;
+	xmiddle = xtemp;
+	ymiddle = ytemp;
+}
+
+void drawMiniMap() {
+	// borderwidthd = vinfo.xres - (borderwidthu + 600);
+ //     borderwidthr = vinfo.yres - (borderwidthl + 600);
+     // borderwidthr = vinfo.xres/2;
+     // borderwidthu = vinfo.xres/2;
+     // borderwidthl = vinfo.xres/2;
+
+     //borderwidthd = 200; //ngurangin kanan?
+     // borderwidthr = 200; //ngurangin yg bawah
+     // borderwidthu = 200; //ngurangin kiri
+     // borderwidthl = 200; //ngurangin atas
+
+	int tempd = borderwidthd;
+	int tempu = borderwidthu;
+	int tempr = borderwidthr;
+	int templ = borderwidthl;
+	borderwidthu = vinfo.xres/2 + 5;
+	borderwidthd = vinfo.xres - (borderwidthu + 300);
+	borderwidthr = vinfo.yres - (borderwidthl + 300);
+	
+
+	int xtemp = xmiddle;
+	int ytemp = ymiddle;
+	xmiddle = borderwidthu + 150;
+	ymiddle = borderwidthl + 150;
+	plotPixelRGBA(xmiddle, ymiddle, 255,0,0,0);
+	drawMiniMapOutline();
+	createBangunanArr(&minibangunan);
+	createJalanArr(&minijalan);
+	movePolylineArray(&minibangunan, vinfo.xres/2.4,(vinfo.yres/7*-1));
+	movePolylineArray(&minijalan, vinfo.xres/2.4,vinfo.yres/7*-1);
+	scalePolylineArray(&minibangunan, xmiddle, ymiddle, 0.5);
+	scalePolylineArray(&minijalan, xmiddle, ymiddle, 0.5);
+	drawMiniMapOutline();
+
+	borderwidthd = tempd;
+	borderwidthr = tempr;
+	borderwidthu = tempu;
+	borderwidthl = templ;
+	xmiddle = xtemp;
+	ymiddle = ytemp;
+}
+
+
+void scalePointer(float scale) {
+	int tempd = borderwidthd;
+	int tempu = borderwidthu;
+	int tempr = borderwidthr;
+	int templ = borderwidthl;
+	int xtemp = xmiddle;
+	int ytemp = ymiddle;
+	borderwidthu = 10;
+	borderwidthd = 10;
+	borderwidthr = 10;
+	borderwidthl = 10;
+	xmiddle = borderwidthu + 150;
+	ymiddle = borderwidthl + 150;
+	scalePolyline(&po, po.xp, po.yp, scale);
+	borderwidthd = tempd;
+	borderwidthr = tempr;
+	borderwidthu = tempu;
+	borderwidthl = templ;
+	xmiddle = xtemp;
+	ymiddle = ytemp;
+	drawMiniMap();
+	drawPolylineOutline(&po);
+} 
+
+void movePointer(int dx, int dy) {
+	int tempd = borderwidthd;
+	int tempu = borderwidthu;
+	int tempr = borderwidthr;
+	int templ = borderwidthl;
+	int xtemp = xmiddle;
+	int ytemp = ymiddle;
+	borderwidthu = 10;
+	borderwidthd = 10;
+	borderwidthr = 10;
+	borderwidthl = 10;
+	xmiddle = borderwidthu + 150;
+	ymiddle = borderwidthl + 150;
+	movePolyline(&po,dx,dy);
+	borderwidthd = tempd;
+	borderwidthr = tempr;
+	borderwidthu = tempu;
+	borderwidthl = templ;
+	xmiddle = xtemp;
+	ymiddle = ytemp;
+	drawMiniMap();
+	drawPolylineOutline(&po);
+}
 
 // METODE HANDLER THREAD IO--------------------------------------------------------------------------------- //
 void *keylistener(void *null) {
@@ -1468,23 +1608,31 @@ void *keylistener(void *null) {
         	if (X == 'C') { // Right arrow
         		movePolylineArray(&bangunan, 10,0);
         		movePolylineArray(&jalan, 10,0);
+        		movePointer((1/scale)*-5,0);
         	} else if (X == 'D') { // Left arrow
         		movePolylineArray(&bangunan, -10,0);
         		movePolylineArray(&jalan, -10,0);
+        		movePointer((1/scale)*5,0);
         	} else if (X == 'A') { // Up arrow
 				movePolylineArray(&bangunan, 0,-10);
 				movePolylineArray(&jalan, 0,-10);
+				movePointer(0,(1/scale)*5);
         	} else if (X == 'B') { // Down arrow
 				movePolylineArray(&bangunan, 0,10);
 				movePolylineArray(&jalan, 0,10);
+				movePointer(0,(1/scale)*-5);
         	}
             
         } else if ((X == 'i') || (X == 'I')) { // Zoom in
         	scalePolylineArray(&bangunan, xmiddle, ymiddle, 1.1);
         	scalePolylineArray(&jalan, xmiddle, ymiddle, 1.1);
+        	scalePointer(1/1.1);
+        	scale *= 1.1;
         } else if ((X == 'o') || (X == 'O')) { // Zoom out
-        	scalePolylineArray(&bangunan, xmiddle, ymiddle, 0.9);
-        	scalePolylineArray(&jalan, xmiddle, ymiddle, 0.9);
+        	scalePolylineArray(&bangunan, xmiddle, ymiddle, 1/1.1);
+        	scalePolylineArray(&jalan, xmiddle, ymiddle, 1/1.1);
+        	scalePointer(1.1);
+        	scale/= 1.1;
         } else if ((X == 'x') || (X == 'X')) {
         	return;
         }
@@ -1497,12 +1645,18 @@ int main(int argc, char *argv[]) {
     
     initScreen();
     clearScreen();
+
+    drawMiniMap();
+    drawMiniMapPointer();
     
     createBangunanArr(&bangunan);
     drawPolylineArrayOutline(&bangunan);
 
     createJalanArr(&jalan);
     drawPolylineArrayOutline(&jalan);
+
+ //    movePolylineArray(&bangunan, vinfo.xres/8,vinfo.yres/10);
+	// movePolylineArray(&jalan, vinfo.xres/8,vinfo.yres/10);
 
 	pthread_t listener;
     pthread_create(&listener, NULL, keylistener, NULL);
