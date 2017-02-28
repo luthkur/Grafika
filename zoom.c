@@ -173,9 +173,27 @@ void initLine(Line* l, int xa, int ya, int xb, int yb, int rx, int gx, int bx, i
 	(*l).r = rx; (*l).g = gx; (*l).b = bx; (*l).a = ax;
 }
 
+int getClipCode(int x, int y) {
+	int code = 0;
+
+	int xmin = borderwidthu-1, xmax = vinfo.xres-borderwidthd;
+	int ymin = borderwidthl-1, ymax = vinfo.yres-borderwidthr;
+
+	if (x < xmin)           // to the left of clip window 0001
+		code |= 1;
+	else if (x > xmax)      // to the right of clip window 0010
+		code |= 2;
+	if (y < ymin)           // below the clip window 0100
+		code |= 4;
+	else if (y > ymax)      // above the clip window 1000
+		code |= 8;
+
+	return code;
+}
+
 int drawLine(Line* l) {
 	
-	if(isOverflow((*l).x1, (*l).y1) && isOverflow((*l).x2, (*l).y2)) {
+	/*if(isOverflow((*l).x1, (*l).y1) && isOverflow((*l).x2, (*l).y2)) {
 		return 0; // Do Nothing if both of the endPoint overflowed
 		
 	} else if(isOverflow((*l).x1, (*l).y1) || isOverflow((*l).x2, (*l).y2)) {
@@ -252,13 +270,76 @@ int drawLine(Line* l) {
 			//printf("ccc %d %d\n", x, y);
 			return drawLine(l);
 		}
+	}*/
+
+	int x1 = (*l).x1, y1 = (*l).y1;
+	int x2 = (*l).x2, y2 = (*l).y2;
+	int xmin = borderwidthu-1, xmax = vinfo.xres-borderwidthd;
+	int ymin = borderwidthl-1, ymax = vinfo.yres-borderwidthr;
+	int x, y;
+
+	int code1 = getClipCode(x1, y1);
+	int code2 = getClipCode(x2, y2);
+
+	int accept = 0;
+	int valid = 1;
+
+	if(isOverflow((*l).x1, (*l).y1) || isOverflow((*l).x2, (*l).y2)) {
+		while(1) {
+			if (!(code1 | code2)) { // Kedua endpoint di dalam batas, keluar loop & print
+				accept = 1;
+				break;
+			} else if (code1 & code2) { // Kedua endpoint di region yang sama diluar batas
+				break;
+			} else {
+
+				//Salah satu endpoint ada di luar batas
+				int code = code1 ? code1 : code2;
+
+				//Cara perpotongan menggunakan persamaan garis
+				if (code & 8) {           // endpoint di atas area clip
+					x = x1 + (x2 - x1) * (ymax - y1) / (y2 - y1);
+					y = ymax;
+				} else if (code & 4) { // endpoint di bawah area clip
+					x = x1 + (x2 - x1) * (ymin - y1) / (y2 - y1);
+					y = ymin;
+				} else if (code & 2) {  // endpoint di sebelah kanan area clip
+					y = y1 + (y2 - y1) * (xmax - x1) / (x2 - x1);
+					x = xmax;
+				} else if (code & 1) {   // endpoint di sebelah kiri area clip
+					y = y1 + (y2 - y1) * (xmin - x1) / (x2 - x1);
+					x = xmin;
+				}
+
+				//Pindahkan point yang ada di luar area ke dalam
+				if (code == code1) {
+					x1 = x;
+					y1 = y;
+					code1 = getClipCode(x1, y1);
+				} else {
+					x2 = x;
+					y2 = y;
+					code2 = getClipCode(x2, y2);
+				}
+			}
+		}
+
+		if(accept) {
+			(*l).x1 = x1;
+			(*l).y1 = y1;
+			(*l).x2 = x2;
+			(*l).y2 = y2;
+			return drawLine(l);
+		}
 	}
+
+
 	
 	int col = 0;
 	
 	// Coord. of the next point to be displayed
-	int x = (*l).x1;
-	int y = (*l).y1;
+	x = (*l).x1;
+	y = (*l).y1;
 
 	// Calculate initial error factor
 	int dx = abs((*l).x2 - (*l).x1);
