@@ -15,18 +15,19 @@ struct fb_fix_screeninfo finfo;     // Struct Fixed Screeninfo
 long int screensize = 0;            // Ukuran data framebuffer
 char *fbp = 0;                      // Framebuffer di memori internal
 
-int borderwidth = 25;               // The border width, distance from the actual screenBorder
+int borderwidthu = 25;               // The border width, distance from the actual screenBorder
+int borderwidthd = 25;               // The border width, distance from the actual screenBorder
+int borderwidthl = 25;               // The border width, distance from the actual screenBorder
+int borderwidthr = 25;               // The border width, distance from the actual screenBorder
+
 int xmiddle;
 int ymiddle;
 
-void *ioHandler(void *);			// The thread that handle the bullet shooting
-
-
 // UTILITY PROCEDURE----------------------------------------------------------------------------------------- //
 int isOverflow(int _x , int _y) {
-	//Cek apakah kooordinat (x,y) sudah melewati batas layar
+//Cek apakah kooordinat (x,y) sudah melewati batas layar
     int result;
-    if ( _x > vinfo.xres-borderwidth || _y > vinfo.yres-borderwidth || _x < borderwidth-1 || _y < borderwidth-1 ) {
+    if ( _x > vinfo.xres-borderwidthd || _y > vinfo.yres-borderwidthr || _x < borderwidthu-1 || _y < borderwidthl-1 ) {
         result = 1;
     }
     else {
@@ -129,7 +130,6 @@ void initScreen() {
      ymiddle = vinfo.yres/2;
     
 }
-
 void clearScreen() {
 	
 	//Mewarnai latar belakang screen dengan warna putih
@@ -171,7 +171,78 @@ int drawLine(Line* l) {
 		
 	} else if(isOverflow((*l).x1, (*l).y1) || isOverflow((*l).x2, (*l).y2)) {
 		// If one of the endPoint overflowed
-	
+		
+		// Memastikan x1 < x2
+		if((*l).x1 > (*l).x2) {
+			int x,y;
+			x = (*l).x1;
+			y = (*l).y1;
+			(*l).x1 = (*l).x2;
+			(*l).y1 = (*l).y2;
+			(*l).x2 = x;
+			(*l).y2 = y;
+		}
+
+		int xlow = borderwidthu-1, xhigh = vinfo.xres-borderwidthd;
+		int ylow = borderwidthl-1, yhigh = vinfo.yres-borderwidthr;
+		int x1 = (*l).x1, y1 = (*l).y1;
+		int x2 = (*l).x2, y2 = (*l).y2;
+		int x, y;
+
+		if (x2 > xhigh) {
+			//printf("%d %d %d %d %d %d %d\n", xhigh, x1, y2, y1, x2, x1, y1);
+			y = ((xhigh - x1) * (y2-y1) / (x2 - x1)) + y1;
+			//printf("aaa %d %d\n", x, y);
+			if (y < ylow) {
+				x = ((ylow - y1) * (x2 - x1) / (y2 - y1)) + x1;
+				y = ylow;
+				//printf("aaa %d %d\n", x, y);
+			} else if (y > yhigh) {
+				x  = ((yhigh - y1) * (x2 - x1) / (y2 - y1)) + x1;
+				y = yhigh;
+				//printf("aaa %d %d\n", x, y);
+			} else {
+				x = xhigh;
+				//printf("aaa %d %d\n", x, y);
+			}
+			(*l).x2 = x;
+			(*l).y2 = y;
+			//printf("aaa %d %d\n", x, y);
+			return drawLine(l);
+		} else if (x1 < xlow) {
+			y = ((xlow - x1) * (y2-y1) / (x2 - x1)) + y1;
+			if (y < ylow) {
+				x  = ((ylow - y1) * (x2 - x1) / (y2 - y1)) + x1;
+				y = ylow;
+			} else if (y > yhigh) {
+				x  = ((yhigh - y1) * (x2 - x1) / (y2 - y1)) + x1;
+				y = yhigh;
+			} else {
+				x = xlow;
+			}
+			(*l).x1 = x;
+			(*l).y1 = y;
+			//printf("bbb %d %d\n", x, y);
+			return drawLine(l);
+		} else {
+			if ((y1 < ylow) || (y2 < ylow)) {
+				y = ylow;
+				x  = ((ylow - y1) * (x2 - x1) / (y2 - y1)) + x1;
+			} else if ((y2 > yhigh) || (y1 > yhigh)) {
+				y = yhigh;
+				x  = ((yhigh - y1) * (x2 - x1) / (y2 - y1)) + x1;
+			}
+
+			if ((y1 < ylow) || (y1 > yhigh)) {
+				(*l).x1 = x;
+				(*l).y1 = y;
+			} else if ((y2 < ylow) || (y2 > yhigh)) {
+				(*l).x2 = x;
+				(*l).y2 = y;
+			}
+			//printf("ccc %d %d\n", x, y);
+			return drawLine(l);
+		}
 	}
 	
 	int col = 0;
@@ -340,14 +411,13 @@ void drawScreenBorder() {
 	
 	PolyLine p;
 	initPolyline(&p,0,0,255,0);
-	addEndPoint(&p, borderwidth,borderwidth);
-	addEndPoint(&p, borderwidth,vinfo.yres-borderwidth);
-	addEndPoint(&p, vinfo.xres-borderwidth,vinfo.yres-borderwidth);
-	addEndPoint(&p, vinfo.xres-borderwidth,borderwidth);
+	addEndPoint(&p, borderwidthd,borderwidthl);
+	addEndPoint(&p, borderwidthd,vinfo.yres-borderwidthr);
+	addEndPoint(&p, vinfo.xres-borderwidthu,vinfo.yres-borderwidthr);
+	addEndPoint(&p, vinfo.xres-borderwidthu,borderwidthl);
 	drawPolylineOutline(&p);
   
 }
-
 // METODE ANIMASI POLYLINE---------------------------------------------------------------------------------- //
 void deletePolyline(PolyLine* p) {
 
@@ -431,60 +501,6 @@ void scalePolyline(PolyLine* p, int xa, int ya, float ratio) {
 	}
 
 	drawPolylineOutline(p);
-}
-
-// METODE HANDLER THREAD IO--------------------------------------------------------------------------------- //
-void *ioHandler(void *null) {
-	char ch;
-	while(1) {
-
-		ch = getchar();
-		if (ch == '\n') {
-
-		}
-
-	}
-
-}
-
-void *keylistener() {
-    while (1) {
-        char X = getch();
-        if (X == '\033') {
-        	getch();
-        	X = getch();
-
-        	//Right arrow
-        	if (X == 'C') {
-        		//Geser ke kanan
-        		printf("Right\n");
-        	}
-        	//Left arrow
-        	else if (X == 'D') {
-        		//Geser ke kiri
-        		printf("Left\n");
-        	}
-        	//Up arrow
-        	else if (X == 'A') {
-        		//Geser ke atas
-        		printf("Up\n");
-        	}
-        	//Down arrow
-        	else if (X == 'B') {
-        		//Geser ke bawah
-        		printf("Down\n");
-        	}
-            
-        } else if ((X == 'i') || (X == 'I')) {
-        	//Zoom in
-        	printf("Zoom in\n");
-        } else if ((X == 'o') || (X == 'O')) {
-        	//Zoom out
-        	printf("Zoom out\n");
-        } else if ((X == 'x') || (X == 'X')) {
-        	exit(0);
-        }
-    }
 }
 
 // PROSEDUR ARRAY OF POLYLINE------------------------------------------------------------------------------- //
@@ -1060,17 +1076,49 @@ void scalePolylineArray(PolyLineArray* parr, int ax, int ay, float scale) {
 	}
 }
 
+PolyLineArray bangunan;
+
+// METODE HANDLER THREAD IO--------------------------------------------------------------------------------- //
+void *keylistener(void *null) {
+    while (1) {
+        char X = getch();
+        if (X == '\033') {
+        	getch();
+        	X = getch();
+
+        	if (X == 'C') { // Right arrow
+        		movePolylineArray(&bangunan, 10,0);
+        	} else if (X == 'D') { // Left arrow
+        		movePolylineArray(&bangunan, -10,0);
+        	} else if (X == 'A') { // Up arrow
+				movePolylineArray(&bangunan, 0,-10);
+        	} else if (X == 'B') { // Down arrow
+				movePolylineArray(&bangunan, 0,10);
+        	}
+            
+        } else if ((X == 'i') || (X == 'I')) { // Zoom in
+        	scalePolylineArray(&bangunan, xmiddle, ymiddle, 1.1);
+        } else if ((X == 'o') || (X == 'O')) { // Zoom out
+        	scalePolylineArray(&bangunan, xmiddle, ymiddle, 0.9);
+        } else if ((X == 'x') || (X == 'X')) {
+        	return;
+        }
+        drawScreenBorder();
+    }
+}
+
 // PROSEDUR PENGGAMBARAN CIRCLE AND ARC--------------------------------------------------------------------- //
 int main(int argc, char *argv[]) {
     
     initScreen();
     clearScreen();
     
-    PolyLineArray bangunan;
     createBangunanArr(&bangunan);
     drawPolylineArrayOutline(&bangunan);
-	scalePolylineArray(&bangunan, xmiddle-500, ymiddle-500, 0.66);
-	scalePolylineArray(&bangunan, xmiddle, ymiddle, 1.5);
+
+	pthread_t listener;
+    pthread_create(&listener, NULL, keylistener, NULL);
+	pthread_join(listener, NULL);
 
     terminate();
     return 0;
