@@ -1055,6 +1055,289 @@ void createBangunanArr(PolyLineArray* parr) {
 	
 }
 
+void createJalanArr(PolyLineArray* parr) {
+	int br = 128; int bg = 128; int bb = 128; int ba = 0;
+	
+	initPolyLineArray(parr,100);
+	
+	PolyLine p;
+
+	// Zone 14
+	{
+		initPolyline(&p, br,bg,bb,ba);
+		addEndPoint(&p, 39, 155);
+		addEndPoint(&p, 40, 85);
+		addEndPoint(&p, 45, 75);
+		addEndPoint(&p, 52, 70);
+		addEndPoint(&p, 56, 65);
+		addEndPoint(&p, 62, 60);
+		addEndPoint(&p, 70, 55);
+		addEndPoint(&p, 80, 50);
+		addEndPoint(&p, 142, 50);
+		addEndPoint(&p, 145, 60);
+		addEndPoint(&p, 80, 60);
+		addEndPoint(&p, 70, 65);
+		addEndPoint(&p, 62, 70);
+		addEndPoint(&p, 56, 75);
+		addEndPoint(&p, 52, 80);
+		addEndPoint(&p, 50, 85);
+		addEndPoint(&p, 49, 155);
+		addPolyline(parr,&p);
+	}
+	// Zone 13
+	{
+		initPolyline(&p, br,bg,bb,ba);
+		addEndPoint(&p, 39, 155);
+		addEndPoint(&p, 38, 240);
+		addEndPoint(&p, 42, 250);
+		addEndPoint(&p, 42, 295);
+		addEndPoint(&p, 48, 295);
+		addEndPoint(&p, 48, 250);
+		addEndPoint(&p, 48, 240);
+		addEndPoint(&p, 49, 155);
+		addPolyline(parr,&p);
+	}
+
+	// Zone 9
+	{
+		initPolyline(&p, br,bg,bb,ba);
+		addEndPoint(&p, 42, 295);
+		addEndPoint(&p, 38, 400);
+		addEndPoint(&p, 44, 400);
+		addEndPoint(&p, 48, 295);
+		addPolyline(parr,&p);
+
+		//jalan 2
+		initPolyline(&p, br,bg,bb,ba);
+		addEndPoint(&p, 46, 392);
+		addEndPoint(&p, 520, 392);
+		addEndPoint(&p, 530, 397);
+		addEndPoint(&p, 530, 403);
+		addEndPoint(&p, 520, 398);
+		addEndPoint(&p, 46, 398);
+		addPolyline(parr,&p);
+
+		// jalan dalam 1
+		initPolyline(&p, br,bg,bb,ba);
+		addEndPoint(&p, 98, 392);
+		addEndPoint(&p, 98, 360);
+		addEndPoint(&p, 104, 360);
+		addEndPoint(&p, 104, 392);
+		addPolyline(parr,&p);
+
+		// jalan dalam 2
+		initPolyline(&p, br,bg,bb,ba);
+		addEndPoint(&p, 176, 392);
+		addEndPoint(&p, 176, 350);
+		addEndPoint(&p, 166, 335);
+		addEndPoint(&p, 166, 300);
+		addEndPoint(&p, 44, 300);
+		addEndPoint(&p, 50, 296);
+		addEndPoint(&p, 170, 296);
+		addEndPoint(&p, 170, 335);
+		addEndPoint(&p, 180, 350);
+		addEndPoint(&p, 180, 392);
+		addPolyline(parr,&p);
+
+	}
+
+	// Zone 10
+	{
+		// jalan dalam 1
+		initPolyline(&p, br,bg,bb,ba);
+		addEndPoint(&p, 307, 392);
+		addEndPoint(&p, 307, 290);
+		addEndPoint(&p, 315, 290);
+		addEndPoint(&p, 315, 392);
+		addPolyline(parr,&p);
+
+		// jalan dalam 2
+		initPolyline(&p, br,bg,bb,ba);
+		addEndPoint(&p, 450, 392);
+		addEndPoint(&p, 450, 290);
+		addEndPoint(&p, 458, 290);
+		addEndPoint(&p, 458, 392);
+		addPolyline(parr,&p);
+	}
+
+	// Zone 11 dan 12
+	{
+		//Jalan loop
+		initPolyline(&p, br,bg,bb,ba);
+		addEndPoint(&p, 145, 280);
+		addEndPoint(&p, 450, 280);
+		addEndPoint(&p, 450, 210);
+		addEndPoint(&p, 433, 210);
+		addEndPoint(&p, 433, 200);
+		addEndPoint(&p, 450, 200);
+		addEndPoint(&p, 450, 146);
+		addEndPoint(&p, 375, 146);
+		addEndPoint(&p, 375, 149);
+		addEndPoint(&p, 145, 149);
+		addEndPoint(&p, 145, 295);
+		
+		addEndPoint(&p, 139, 295);
+		addEndPoint(&p, 139, 143);
+		addEndPoint(&p, 375, 143);
+		addEndPoint(&p, 458, 143);
+		addEndPoint(&p, 458, 210);
+		addEndPoint(&p, 458, 290);
+		addEndPoint(&p, 145, 290);
+		addPolyline(parr,&p);
+
+		//Jalan dalem
+		initPolyline(&p, br,bg,bb,ba);
+		addEndPoint(&p, 309, 280);
+		addEndPoint(&p, 309, 230);
+		addEndPoint(&p, 289, 205);
+		addEndPoint(&p, 309, 180);
+		addEndPoint(&p, 309, 150);
+
+		addEndPoint(&p, 319, 150);
+		addEndPoint(&p, 319, 180);
+		addEndPoint(&p, 339, 205);
+		addEndPoint(&p, 319, 230);
+		addEndPoint(&p, 319, 280);
+		addPolyline(parr,&p);
+
+	}
+
+	// Zone 15
+	{
+		//Jalan dalem
+		initPolyline(&p, br,bg,bb,ba);
+		addEndPoint(&p, 300, 142);
+		addEndPoint(&p, 300, 50);
+		addEndPoint(&p, 235, 50);
+		addEndPoint(&p, 235, 75);
+		addEndPoint(&p, 190, 75);
+		addEndPoint(&p, 190, 140);
+		addEndPoint(&p, 184, 140);
+		addEndPoint(&p, 184, 42);
+
+		addEndPoint(&p, 464, 42);
+		addEndPoint(&p, 464, 87);
+		addEndPoint(&p, 560, 87);
+		addEndPoint(&p, 560, 95);
+		addEndPoint(&p, 464, 95);
+		addEndPoint(&p, 464, 145);
+		addEndPoint(&p, 460, 145);
+		addEndPoint(&p, 460, 50);
+		addEndPoint(&p, 330, 50);
+		addEndPoint(&p, 330, 142);
+		addPolyline(parr,&p);
+	}
+
+	//Zone 5 dan 6
+	{
+		//Jalan dalem
+		initPolyline(&p, br,bg,bb,ba);
+		addEndPoint(&p, 305, 398);
+		addEndPoint(&p, 305, 577);
+
+		addEndPoint(&p, 330, 577);
+		addEndPoint(&p, 330, 398);
+		addPolyline(parr,&p);
+
+		//Jalan dalem extended
+		initPolyline(&p, br,bg,bb,ba);
+		addEndPoint(&p, 300, 583);
+		addEndPoint(&p, 300, 600);
+
+		addEndPoint(&p, 325, 600);
+		addEndPoint(&p, 325, 583);
+		addPolyline(parr,&p);
+	}
+
+	// Zone 8
+	{
+		initPolyline(&p, br,bg,bb,ba);
+		addEndPoint(&p, 38, 400);
+		addEndPoint(&p, 37, 420);
+		addEndPoint(&p, 37, 500);
+		addEndPoint(&p, 42, 530);
+		addEndPoint(&p, 48, 530);
+		addEndPoint(&p, 42, 500);
+		addEndPoint(&p, 43, 420);
+		addEndPoint(&p, 44, 400);
+		addPolyline(parr,&p);
+
+		//jalan dalam
+		initPolyline(&p, br,bg,bb,ba);
+		addEndPoint(&p, 100, 450);
+		addEndPoint(&p, 100, 530);
+		addEndPoint(&p, 106, 530);
+		addEndPoint(&p, 106, 450);
+		addPolyline(parr,&p);
+
+		initPolyline(&p, br,bg,bb,ba);
+		addEndPoint(&p, 100, 530);
+		addEndPoint(&p, 102, 540);
+		addEndPoint(&p, 106, 550);
+		addEndPoint(&p, 112, 560);
+		addEndPoint(&p, 120, 570);
+		addEndPoint(&p, 130, 575);
+		addEndPoint(&p, 136, 575);
+		addEndPoint(&p, 126, 570);
+		addEndPoint(&p, 118, 560);
+		addEndPoint(&p, 112, 550);
+		addEndPoint(&p, 108, 540);
+		addEndPoint(&p, 106, 530);
+		addPolyline(parr,&p);
+	}
+
+	// Zone 2
+	{
+		initPolyline(&p, br,bg,bb,ba);
+		addEndPoint(&p, 42, 530);
+		addEndPoint(&p, 44, 540);
+		addEndPoint(&p, 48, 550);
+		addEndPoint(&p, 54, 560);
+		addEndPoint(&p, 62, 570);
+		addEndPoint(&p, 72, 580);
+		addEndPoint(&p, 78, 580);
+		addEndPoint(&p, 80, 580);
+		addEndPoint(&p, 425, 583);
+		addEndPoint(&p, 425, 578);
+		addEndPoint(&p, 80, 575);
+		addEndPoint(&p, 70, 572);
+		addEndPoint(&p, 68, 570);
+		addEndPoint(&p, 60, 560);
+		addEndPoint(&p, 54, 550);
+		addEndPoint(&p, 50, 540);
+		addEndPoint(&p, 48, 530);
+		addPolyline(parr,&p);
+	}
+
+	// Zone 2
+	{
+		initPolyline(&p, br,bg,bb,ba);
+		addEndPoint(&p, 425, 583);
+		addEndPoint(&p, 485, 583);
+		addEndPoint(&p, 490, 587);
+		addEndPoint(&p, 495, 595);
+		addEndPoint(&p, 500, 595);
+		addEndPoint(&p, 500, 568);
+		addEndPoint(&p, 495, 568);
+		addEndPoint(&p, 490, 574);
+		addEndPoint(&p, 485, 578);
+		addEndPoint(&p, 425, 578);
+		addPolyline(parr,&p);
+
+		//jalan ke atas
+		initPolyline(&p, br,bg,bb,ba);
+		addEndPoint(&p, 495, 568);
+		addEndPoint(&p, 495, 510);
+		addEndPoint(&p, 530, 510);
+		addEndPoint(&p, 530, 400);
+		addEndPoint(&p, 535, 400);
+		addEndPoint(&p, 535, 515);
+		addEndPoint(&p, 500, 515);
+		addEndPoint(&p, 500, 568);
+		addPolyline(parr,&p);
+	}
+}
+
 void drawPolylineArrayOutline(PolyLineArray* parr) {
 	int i;
 	for(i=0; i<(*parr).PolyCount;i++) {
@@ -1077,6 +1360,7 @@ void scalePolylineArray(PolyLineArray* parr, int ax, int ay, float scale) {
 }
 
 PolyLineArray bangunan;
+PolyLineArray jalan;
 
 // METODE HANDLER THREAD IO--------------------------------------------------------------------------------- //
 void *keylistener(void *null) {
@@ -1088,18 +1372,24 @@ void *keylistener(void *null) {
 
         	if (X == 'C') { // Right arrow
         		movePolylineArray(&bangunan, 10,0);
+        		movePolylineArray(&jalan, 10,0);
         	} else if (X == 'D') { // Left arrow
         		movePolylineArray(&bangunan, -10,0);
+        		movePolylineArray(&jalan, -10,0);
         	} else if (X == 'A') { // Up arrow
 				movePolylineArray(&bangunan, 0,-10);
+				movePolylineArray(&jalan, 0,-10);
         	} else if (X == 'B') { // Down arrow
 				movePolylineArray(&bangunan, 0,10);
+				movePolylineArray(&jalan, 0,10);
         	}
             
         } else if ((X == 'i') || (X == 'I')) { // Zoom in
         	scalePolylineArray(&bangunan, xmiddle, ymiddle, 1.1);
+        	scalePolylineArray(&jalan, xmiddle, ymiddle, 1.1);
         } else if ((X == 'o') || (X == 'O')) { // Zoom out
         	scalePolylineArray(&bangunan, xmiddle, ymiddle, 0.9);
+        	scalePolylineArray(&jalan, xmiddle, ymiddle, 0.9);
         } else if ((X == 'x') || (X == 'X')) {
         	return;
         }
@@ -1115,6 +1405,9 @@ int main(int argc, char *argv[]) {
     
     createBangunanArr(&bangunan);
     drawPolylineArrayOutline(&bangunan);
+
+    createJalanArr(&jalan);
+    drawPolylineArrayOutline(&jalan);
 
 	pthread_t listener;
     pthread_create(&listener, NULL, keylistener, NULL);
