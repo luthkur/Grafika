@@ -2067,7 +2067,6 @@ void createPohonArr(PolyLineArray* parr) {
 	
 }
 
-
 void drawPolylineArrayOutline(PolyLineArray* parr) {
 	int i;
 	for(i=0; i<(*parr).PolyCount;i++) {
@@ -2164,8 +2163,9 @@ void drawMiniMap() {
 	xmiddle = borderwidthu + 150;
 	ymiddle = borderwidthl + 150;
 	plotPixelRGBA(xmiddle, ymiddle, 255,0,0,0);
-	drawMiniMapOutline();
 	
+	drawMiniMapOutline();
+
 	createBangunanArr(&minibangunan);
 	createJalanArr(&minijalan);
 	createPohonArr(&minipohon);
@@ -2248,13 +2248,13 @@ void *keylistener(void *null) {
         	if (X == 'C') { // Right arrow
         		movePolylineArray(&bangunan, 10,0);
         		movePolylineArray(&jalan, 10,0);
-        		movePolylineArray(&pohon, 10,0);
+				movePolylineArray(&pohon, 10,0);
         		
         		movePointer((1/scale)*-5,0);
         	} else if (X == 'D') { // Left arrow
         		movePolylineArray(&bangunan, -10,0);
         		movePolylineArray(&jalan, -10,0);
-        		movePolylineArray(&pohon, -10,0);
+				movePolylineArray(&pohon, -10,0);
         		
         		movePointer((1/scale)*5,0);
         	} else if (X == 'A') { // Up arrow
@@ -2267,21 +2267,20 @@ void *keylistener(void *null) {
 				movePolylineArray(&bangunan, 0,10);
 				movePolylineArray(&jalan, 0,10);
 				movePolylineArray(&pohon, 0,10);
-				
 				movePointer(0,(1/scale)*-5);
         	}
             
         } else if ((X == 'i') || (X == 'I')) { // Zoom in
         	scalePolylineArray(&bangunan, xmiddle, ymiddle, 1.1);
         	scalePolylineArray(&jalan, xmiddle, ymiddle, 1.1);
-        	scalePolylineArray(&pohon, xmiddle, ymiddle, 1.1);
+			scalePolylineArray(&pohon, xmiddle, ymiddle, 1.1);
         	
         	scalePointer(1/1.1);
         	scale *= 1.1;
         } else if ((X == 'o') || (X == 'O')) { // Zoom out
         	scalePolylineArray(&bangunan, xmiddle, ymiddle, 1/1.1);
         	scalePolylineArray(&jalan, xmiddle, ymiddle, 1/1.1);
-        	scalePolylineArray(&pohon, xmiddle, ymiddle, 1/1.1);
+			scalePolylineArray(&pohon, xmiddle, ymiddle, 1/1.1);
         	
         	scalePointer(1.1);
         	scale/= 1.1;
@@ -2298,8 +2297,8 @@ int main(int argc, char *argv[]) {
     initScreen();
     clearScreen();
 
-    //drawMiniMap();
-    //drawMiniMapPointer();
+    drawMiniMap();
+    drawMiniMapPointer();
     
     createBangunanArr(&bangunan);
     drawPolylineArrayOutline(&bangunan);
