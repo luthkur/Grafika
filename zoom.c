@@ -23,7 +23,6 @@ void *ioHandler(void *);			// The thread that handle the bullet shooting
 
 
 // UTILITY PROCEDURE----------------------------------------------------------------------------------------- //
-
 int isOverflow(int _x , int _y) {
 	//Cek apakah kooordinat (x,y) sudah melewati batas layar
     int result;
@@ -66,7 +65,6 @@ char getch() {
 void drawScreenBorder();
 
 // PROSEDUR RESET LAYAR DAN PEWARNAAN PIXEL----------------------------------------------------------------- //
-
 int plotPixelRGBA(int _x, int _y, int r, int g, int b, int a) {
 	//Plot pixel (x,y) dengan warna (r,g,b,a)
 	if(!isOverflow(_x,_y)) {
@@ -150,7 +148,6 @@ void clearScreen() {
 
 
 // STRUKTUR DATA DAN METODE PENGGAMBARAN GARIS-------------------------------------------------------------- //
-
 typedef struct {
 
   int x1; int y1; // Koordinat titik pertama garis
@@ -262,7 +259,6 @@ int drawLine(Line* l) {
 
 
 // METODE PEWARNAAN UMUM------------------------------------------------------------------------------------ //
-
 void floodFill(int x,int y, int r,int g,int b,int a, int rb,int gb,int bb,int ab) {
 // rgba is the color of the fill, rbgbbbab is the color of the border
 	if((!isOverflow(x,y)) ) {
@@ -283,7 +279,6 @@ void floodFill(int x,int y, int r,int g,int b,int a, int rb,int gb,int bb,int ab
 
 
 // STRUKTUR DATA DAN METODE PENGGAMBARAN POLYLINE----------------------------------------------------------- //
-
 typedef struct {
 
 	int x[100];
@@ -354,7 +349,6 @@ void drawScreenBorder() {
 }
 
 // METODE ANIMASI POLYLINE---------------------------------------------------------------------------------- //
-
 void deletePolyline(PolyLine* p) {
 
   fillPolyline(p, 0,0,0,0);
@@ -440,7 +434,6 @@ void scalePolyline(PolyLine* p, int xa, int ya, float ratio) {
 }
 
 // METODE HANDLER THREAD IO--------------------------------------------------------------------------------- //
-
 void *ioHandler(void *null) {
 	char ch;
 	while(1) {
@@ -450,104 +443,6 @@ void *ioHandler(void *null) {
 
 		}
 
-	}
-
-}
-
-
-// PROSEDUR PENGGAMBARAN CIRCLE AND ARC--------------------------------------------------------------------- //
-
-void drawCircle(double cx, double cy, int radius, int r, int g, int b, int a) {
-	inline void plot4points(double cx, double cy, double x, double y) {
-		plotPixelRGBA(cx + x, cy + y, r, g, b, a);
-	    plotPixelRGBA(cx - x, cy + y, r, g, b, a);
-		plotPixelRGBA(cx + x, cy - y, r, g, b, a);
-		plotPixelRGBA(cx - x, cy - y, r, g, b, a);
-	}
-
-	inline void plot8points(double cx, double cy, double x, double y) {
-		plot4points(cx, cy, x, y);
-		plot4points(cx, cy, y, x);
-	}
-
-	int error = -radius;
-	double x = radius;
-	double y = 0;
-
-	while (x >= y) {
-		plot8points(cx, cy, x, y);
-
-		error += y;
-		y++;
-		error += y;
-
-		if (error >= 0)
-		{
-			error += -x;
-			x--;
-			error += -x;
-		}
-	}
-}
-
-void drawArcUp(double cx, double cy, int radius, int r, int g, int b, int a){
-  inline void plot4points(double cx, double cy, double x, double y) {
-		plotPixelRGBA(cx + x, cy - y, r, g, b, a);
-		plotPixelRGBA(cx - x, cy - y, r, g, b, a);
-	}
-
-	inline void plot8points(double cx, double cy, double x, double y) {
-		plot4points(cx, cy, x, y);
-		plot4points(cx, cy, y, x);
-	}
-
-	int error = -radius;
-	double x = radius;
-	double y = 0;
-
-	while (x >= y) {
-		plot8points(cx, cy, x, y);
-
-		error += y;
-		y++;
-		error += y;
-
-		if (error >= 0) {
-			error += -x;
-			x--;
-			error += -x;
-		}
-	}
-
-}
-
-void drawArcDown(double cx, double cy, int radius, int r, int g, int b, int a){
-  inline void plot4points(double cx, double cy, double x, double y) {
-		plotPixelRGBA(cx + x, cy + y, r, g, b, a);
-		plotPixelRGBA(cx - x, cy + y, r, g, b, a);
-	}
-
-	inline void plot8points(double cx, double cy, double x, double y) {
-		plot4points(cx, cy, x, y);
-		plot4points(cx, cy, y, x);
-	}
-
-	int error = -radius;
-	double x = radius;
-	double y = 0;
-
-	while (x >= y) {
-		plot8points(cx, cy, x, y);
-
-		error += y;
-		y++;
-		error += y;
-
-		if (error >= 0) {
-			error += -x;
-			x--;
-			error += -x;
-		}
 	}
 
 }
@@ -592,8 +487,7 @@ void *keylistener() {
     }
 }
 
-// --------------------------------------------------------------------------------------------------------- //
-
+// PROSEDUR ARRAY OF POLYLINE------------------------------------------------------------------------------- //
 typedef struct {
 
 	PolyLine* arr;
@@ -911,6 +805,238 @@ void createBangunanArr(PolyLineArray* parr) {
 	addPolyline(parr,&p);
 }
 	
+	// Zone 4
+	{
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 470,283, 550,303);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	addEndPoint(&p, 491, 311);
+	addEndPoint(&p, 550, 311);
+	addEndPoint(&p, 550, 336);
+	addEndPoint(&p, 540, 336);
+	addEndPoint(&p, 540, 330);
+	addEndPoint(&p, 515, 330);
+	addEndPoint(&p, 515, 338);
+	addEndPoint(&p, 491, 338);
+	setFirePoint(&p, 504, 33);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 533,340, 556,365);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 533,365, 548,394);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 462,343, 514,388);
+	addPolyline(parr,&p);
+	}
+	
+	// Zone 3
+	{
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 471,447, 526,471);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 471,484, 526,507);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 467,507, 419,485);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	addEndPoint(&p, 433, 485);
+	addEndPoint(&p, 433, 470);
+	addEndPoint(&p, 467, 470);
+	addEndPoint(&p, 467, 446);
+	addEndPoint(&p, 406, 446);
+	addEndPoint(&p, 406, 485);
+	setFirePoint(&p, 433, 460);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 427,513, 442,535);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 447,513, 462,535);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 444,537, 462,550);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	addEndPoint(&p, 406, 436);
+	addEndPoint(&p, 523, 436);
+	addEndPoint(&p, 523, 409);
+	addEndPoint(&p, 423, 409);
+	addEndPoint(&p, 423, 404);
+	addEndPoint(&p, 406, 404);
+	setFirePoint(&p, 465, 421);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	addEndPoint(&p, 467, 516);
+	addEndPoint(&p, 467, 561);
+	addEndPoint(&p, 491, 561);
+	addEndPoint(&p, 491, 541);
+	addEndPoint(&p, 484, 516);
+	setFirePoint(&p, 477, 539);
+	addPolyline(parr,&p);
+	
+	}
+
+	// Zone 8
+	{
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 71,487, 91,531);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 49,465, 96,479);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	addEndPoint(&p, 55, 456);
+	addEndPoint(&p, 65, 448);
+	addEndPoint(&p, 78, 456);
+	addEndPoint(&p, 65, 465);
+	setFirePoint(&p, 65, 455);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 47,427, 100,448);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 59,405, 100,426);
+	addPolyline(parr,&p);
+	}
+
+	// Zone 7
+	{
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 123,515, 218,531);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 109,492, 218,507);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 194,482, 218,492);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 109,492, 129,484);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 109,469, 151,484);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 157,464, 206,478);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 206,478, 219,410);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 206,459, 158,443);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 206,422, 158,410);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 166,443, 177,422);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 137,402, 153,454);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 114,454, 130,431);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 116,400, 132,430);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 116,426, 107,410);
+	addPolyline(parr,&p);
+	}
+
+	// Zone 2
+	{
+	initPolyline(&p, br,bg,bb,ba);
+	addEndPoint(&p, 199, 543);
+	addEndPoint(&p, 199, 561);
+	addEndPoint(&p, 210, 561);
+	addEndPoint(&p, 210, 576);
+	addEndPoint(&p, 261, 576);
+	addEndPoint(&p, 261, 560);
+	addEndPoint(&p, 273, 561);
+	addEndPoint(&p, 273, 543);
+	addEndPoint(&p, 258, 531);
+	addEndPoint(&p, 214, 531);
+	setFirePoint(&p, 235, 553);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	addEndPoint(&p, 199+150, 543);
+	addEndPoint(&p, 199+150, 561);
+	addEndPoint(&p, 210+150, 561);
+	addEndPoint(&p, 210+150, 576);
+	addEndPoint(&p, 261+150, 576);
+	addEndPoint(&p, 261+150, 560);
+	addEndPoint(&p, 273+150, 561);
+	addEndPoint(&p, 273+150, 543);
+	addEndPoint(&p, 258+150, 531);
+	addEndPoint(&p, 214+150, 531);
+	setFirePoint(&p, 235+150, 553);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 262,587, 298,598);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 327,598, 363,587);
+	addPolyline(parr,&p);
+	}
+
+	// Zone 6
+	{
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 249,414, 303,434);
+	addPolyline(parr,&p);
+	}
+		
+	// Zone 5
+	{
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 337,413, 393,433);
+	addPolyline(parr,&p);
+	
+	initPolyline(&p, br,bg,bb,ba);
+	boxPolyline(&p, 369,500, 394,520);
+	addPolyline(parr,&p);
+	}
+		
+	
 }
 
 void drawPolylineArrayOutline(PolyLineArray* parr) {
@@ -920,6 +1046,21 @@ void drawPolylineArrayOutline(PolyLineArray* parr) {
 	}
 }
 
+void movePolylineArray(PolyLineArray* parr, int dx, int dy) {
+	int i;
+	for(i=0; i<(*parr).PolyCount;i++) {
+		movePolyline(&((*parr).arr[i]), dx, dy);
+	}
+}
+
+void scalePolylineArray(PolyLineArray* parr, int ax, int ay, float scale) {
+	int i;
+	for(i=0; i<(*parr).PolyCount;i++) {
+		scalePolyline(&((*parr).arr[i]), ax, ay, scale);
+	}
+}
+
+// PROSEDUR PENGGAMBARAN CIRCLE AND ARC--------------------------------------------------------------------- //
 int main(int argc, char *argv[]) {
     
     initScreen();
@@ -928,6 +1069,8 @@ int main(int argc, char *argv[]) {
     PolyLineArray bangunan;
     createBangunanArr(&bangunan);
     drawPolylineArrayOutline(&bangunan);
+	scalePolylineArray(&bangunan, xmiddle-500, ymiddle-500, 0.66);
+	scalePolylineArray(&bangunan, xmiddle, ymiddle, 1.5);
 
     terminate();
     return 0;
