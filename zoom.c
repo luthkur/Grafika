@@ -128,6 +128,15 @@ void initScreen() {
 	 
      xmiddle = vinfo.xres/2;
      ymiddle = vinfo.yres/2;
+     borderwidthd = vinfo.xres/2.5;
+     // borderwidthr = vinfo.xres/2;
+     // borderwidthu = vinfo.xres/2;
+     // borderwidthl = vinfo.xres/2;
+
+     //borderwidthd = 200; //ngurangin kanan?
+     // borderwidthr = 200; //ngurangin yg bawah
+     // borderwidthu = 200; //ngurangin kiri
+     // borderwidthl = 200; //ngurangin atas
     
 }
 void clearScreen() {
@@ -408,13 +417,18 @@ void fillPolyline(PolyLine* p, int rx, int gx, int bx, int ax) {
 }
 
 void drawScreenBorder() {
+
+	// borderwidthd = 200; //ngurangin kanan?
+     // borderwidthr = 200; //ngurangin yg bawah
+     // borderwidthu = 200; //ngurangin kiri
+     // borderwidthl = 200; //ngurangin atas
 	
 	PolyLine p;
 	initPolyline(&p,0,0,255,0);
-	addEndPoint(&p, borderwidthd,borderwidthl);
-	addEndPoint(&p, borderwidthd,vinfo.yres-borderwidthr);
-	addEndPoint(&p, vinfo.xres-borderwidthu,vinfo.yres-borderwidthr);
-	addEndPoint(&p, vinfo.xres-borderwidthu,borderwidthl);
+	addEndPoint(&p, borderwidthu,borderwidthl);
+	addEndPoint(&p, vinfo.xres-borderwidthd,borderwidthl);
+	addEndPoint(&p, vinfo.xres-borderwidthd,vinfo.yres-borderwidthr);
+	addEndPoint(&p, borderwidthu,vinfo.yres-borderwidthr);
 	drawPolylineOutline(&p);
   
 }
