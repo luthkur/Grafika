@@ -8,6 +8,7 @@
 #include <time.h>
 #include <math.h>
 #include <termios.h>
+#include <pthread.h>
 
 int fbfd = 0;                       // Filebuffer Filedescriptor
 struct fb_var_screeninfo vinfo;     // Struct Variable Screeninfo
@@ -2249,25 +2250,25 @@ void *keylistener(void *null) {
         	getch();
         	X = getch();
 
-        	if (X == 'C') { // Right arrow
+        	if (X == 'D') { // Right arrow
         		movePolylineArray(&bangunan, 10,0);
         		movePolylineArray(&jalan, 10,0);
 				movePolylineArray(&pohon, 10,0);
 
         		movePointer((1/scale)*-5,0);
-        	} else if (X == 'D') { // Left arrow
+        	} else if (X == 'C') { // Left arrow
         		movePolylineArray(&bangunan, -10,0);
         		movePolylineArray(&jalan, -10,0);
 				movePolylineArray(&pohon, -10,0);
 
         		movePointer((1/scale)*5,0);
-        	} else if (X == 'A') { // Up arrow
+        	} else if (X == 'B') { // Up arrow
 				movePolylineArray(&bangunan, 0,-10);
 				movePolylineArray(&jalan, 0,-10);
 				movePolylineArray(&pohon, 0,-10);
 
 				movePointer(0,(1/scale)*5);
-        	} else if (X == 'B') { // Down arrow
+        	} else if (X == 'A') { // Down arrow
 				movePolylineArray(&bangunan, 0,10);
 				movePolylineArray(&jalan, 0,10);
 				movePolylineArray(&pohon, 0,10);
